@@ -12,29 +12,42 @@ public class Fournisseur {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "raison_social")
+    @Column(name = "raison_sociale", nullable = false, length = 255)
     private String raisonSociale;
+
+    @Column(nullable = false, length = 500)
     private String adresse;
+
+    @Column(nullable = false, length = 100)
     private String ville;
-    @Column(name = "personne_contact")
+
+    @Column(name = "personne_contact", nullable = false, length = 255)
     private String personneContact;
+
+    @Column(nullable = false, length = 255)
     private String email;
-    private String telephone;
-    @Column(unique = true , length = 15)
-    private String ice;
-    @Column(name = "created_at")
-    private LocalDateTime dateCreation ;
-    @Column(name = "updated_at")
+
+    @Column(nullable = false)
+    private int telephone; 
+
+    @Column(unique = true, nullable = false)
+    private int ice; 
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime dateCreation;
+
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime dateModification;
 
-
     @PrePersist
-    public void prePersist(){
-        this.dateCreation = LocalDateTime.now();
+    public void prePersist() {
+        LocalDateTime now = LocalDateTime.now();
+        this.dateCreation = now;
+        this.dateModification = now;
     }
 
     @PreUpdate
-    public void preUpdate(){
+    public void preUpdate() {
         this.dateModification = LocalDateTime.now();
     }
 }

@@ -54,16 +54,16 @@
                 <constraints nullable="false"/>
             </column>
             <column name="description" type="TEXT"/>
-            <column name="prix_unitaire" type="DECIMAL(10,2)">
+            <column name="prix_unitaire" type="DOUBLE">
                 <constraints nullable="false"/>
             </column>
             <column name="categorie" type="VARCHAR(100)">
                 <constraints nullable="false"/>
             </column>
-            <column name="stock_actuel" type="DECIMAL(10,2)" defaultValueNumeric="0">
+            <column name="stock_actuel" type="INT" defaultValueNumeric="0">
                 <constraints nullable="false"/>
             </column>
-            <column name="point_commande" type="DECIMAL(10,2)">
+            <column name="point_commande" type="INT">
                 <constraints nullable="false"/>
             </column>
             <column name="unite_mesure" type="VARCHAR(20)">
