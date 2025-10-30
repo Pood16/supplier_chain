@@ -1,5 +1,20 @@
 package org.tricol.supplierchain.dto.response;
 
-// Example class: DTO for outgoing Fournisseur responses
+import lombok.Data;
+
+import java.time.LocalDateTime;
+
+@Data
 public class FournisseurResponseDTO {
+
+    private String raisonSociale;
+    private String adresse;
+    private String ville;
+    private String personneContact;
+    private String email;
+    private String telephone;
+    private String ice;
+    private LocalDateTime dateCreation;
+    private LocalDateTime dateModification;
+
 }

@@ -28,10 +28,10 @@ public class Fournisseur {
     private String email;
 
     @Column(nullable = false)
-    private int telephone; 
+    private String telephone;
 
     @Column(unique = true, nullable = false)
-    private int ice; 
+    private String ice;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime dateCreation;
