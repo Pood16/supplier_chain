@@ -53,7 +53,7 @@
             <column name="nom" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="description" type="TEXT"/>
+            <column name="description" type="CLOB"/>
             <column name="prix_unitaire" type="DOUBLE">
                 <constraints nullable="false"/>
             </column>

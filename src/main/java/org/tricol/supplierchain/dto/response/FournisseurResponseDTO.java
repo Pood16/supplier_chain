@@ -19,5 +19,7 @@ public class FournisseurResponseDTO {
     private String email;
     private String telephone;
     private String ice;
+    private LocalDateTime dateCreation;
+    private LocalDateTime dateModification;
 
 }
