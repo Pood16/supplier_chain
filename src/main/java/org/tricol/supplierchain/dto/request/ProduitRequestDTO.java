@@ -1,6 +1,7 @@
 package org.tricol.supplierchain.dto.request;
 
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -20,12 +21,15 @@ public class ProduitRequestDTO {
     private String description;
 
     @NotNull(message = "le prix unitaire est obligatoire")
+    @Min(value = 0, message = "le prix unitaire doit être positif")
     private Double prixUnitaire;
 
     @NotNull(message = "le stock actuel est obligatoire")
+    @Min(value = 0, message = "le stock actuel doit être positif")
     private int stockActuel;
 
     @NotNull(message = "le point de commande est obligatoire")
+    @Min(value = 0, message = "le point de commande doit être positif")
     private int pointCommande;
 
     @NotBlank(message = "l'unité de mesure est obligatoire")
@@ -34,7 +38,4 @@ public class ProduitRequestDTO {
     @NotBlank(message = "la catégorie est obligatoire")
     private String categorie;
 
-    private LocalDateTime dateCreation;
-
-    private LocalDateTime dateModification;
 }

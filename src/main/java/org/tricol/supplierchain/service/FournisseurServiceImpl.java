@@ -9,6 +9,7 @@ import org.tricol.supplierchain.dto.request.FournisseurUpdateDTO;
 import org.tricol.supplierchain.dto.response.FournisseurResponseDTO;
 import org.tricol.supplierchain.entity.Fournisseur;
 import org.tricol.supplierchain.exception.DuplicateResourceException;
+import org.tricol.supplierchain.exception.ResourceNotFoundException;
 import org.tricol.supplierchain.mapper.FournisseurMapper;
 import org.tricol.supplierchain.repository.FournisseurRepository;
 import org.tricol.supplierchain.service.inter.FournisseurService;
@@ -47,7 +48,7 @@ public class FournisseurServiceImpl implements FournisseurService {
     @Override
     public void deleteFournisseur(Long id) {
         Fournisseur fournisseur = fournisseurRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Fournisseur avec l'id " + id + " non trouvé."));
+                .orElseThrow(() -> new ResourceNotFoundException("Fournisseur avec l'id " + id + " non trouvé."));
         fournisseurRepository.delete(fournisseur);
     }
 
@@ -55,7 +56,7 @@ public class FournisseurServiceImpl implements FournisseurService {
     @Override
     public FournisseurResponseDTO getFournisseur(Long id) {
         Fournisseur fournisseur = fournisseurRepository.findById(id)
-                .orElseThrow(()-> new IllegalArgumentException("Fournisseur avec l'id " + id + " non trouvé."));
+                .orElseThrow(()-> new ResourceNotFoundException("Fournisseur avec l'id " + id + " non trouvé."));
         return fournisseurMapper.toResponseDTO(fournisseur);
     }
 
@@ -64,7 +65,7 @@ public class FournisseurServiceImpl implements FournisseurService {
 
 
         Fournisseur fournisseur = fournisseurRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Fournisseur avec l'id " + id + " non trouvé."));
+                .orElseThrow(() -> new ResourceNotFoundException("Fournisseur avec l'id " + id + " non trouvé."));
 
         if (updateDTO.getIce() != null && !updateDTO.getIce().equals(fournisseur.getIce())
                 && fournisseurRepository.existsByIce(updateDTO.getIce())) {

@@ -8,4 +8,5 @@ import org.tricol.supplierchain.entity.Produit;
 @Repository
 public interface ProduitRepository extends JpaRepository<Produit, Long> {
 
+    boolean existsByReference(String reference);
 }
