@@ -25,7 +25,7 @@ public class Fournisseur {
     @Column(name = "personne_contact", nullable = false, length = 255)
     private String personneContact;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false, length = 255 , unique = true)
     private String email;
 
     @Column(nullable = false)
