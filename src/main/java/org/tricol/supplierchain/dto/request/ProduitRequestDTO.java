@@ -34,7 +34,6 @@ public class ProduitRequestDTO {
     @NotBlank(message = "la catégorie est obligatoire")
     private String categorie;
 
-
     private LocalDateTime dateCreation;
 
     private LocalDateTime dateModification;
