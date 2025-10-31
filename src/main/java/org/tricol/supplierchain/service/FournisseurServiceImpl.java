@@ -2,6 +2,7 @@ package org.tricol.supplierchain.service;
 
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.tricol.supplierchain.dto.request.FournisseurRequestDTO;
 import org.tricol.supplierchain.dto.response.FournisseurResponseDTO;
@@ -25,10 +26,10 @@ public class FournisseurServiceImpl implements FournisseurService {
     public FournisseurResponseDTO crerateFournisseur(FournisseurRequestDTO fournisseurRequest) {
         Fournisseur fournisseur = fournisseurMapper.toEntity(fournisseurRequest);
         if(fournisseurRepository.existsByEmail(fournisseur.getEmail())) {
-            throw new DuplicateResourceException("Fournisseur with Email " + fournisseur.getEmail() + " already exists.");
+            throw new DuplicateResourceException("Fournisseur avec Email " + fournisseur.getEmail() + " existe déjà.");
         }
         if(fournisseurRepository.existsByIce(fournisseur.getIce())) {
-            throw new DuplicateResourceException("Fournisseur with ICE " + fournisseur.getIce() + " already exists.");
+            throw new DuplicateResourceException("Fournisseur avec ICE " + fournisseur.getIce() + " existe déjà.");
         }
         return fournisseurMapper.toResponseDTO(
                 fournisseurRepository.save(fournisseur)
@@ -41,4 +42,13 @@ public class FournisseurServiceImpl implements FournisseurService {
                 .map(fournisseurMapper::toResponseDTO)
                 .toList();
     }
+
+    @Override
+    public void deleteFournisseur(Long id) {
+        Fournisseur fournisseur = fournisseurRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Fournisseur avec l'id " + id + " non trouvé."));
+        fournisseurRepository.delete(fournisseur);;
+    }
+
+
 }

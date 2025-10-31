@@ -10,4 +10,5 @@ public interface FournisseurService {
 
     FournisseurResponseDTO crerateFournisseur(FournisseurRequestDTO fournisseurRequest);
     List<FournisseurResponseDTO> getAllFournisseurs();
+    void deleteFournisseur(Long id);
 }

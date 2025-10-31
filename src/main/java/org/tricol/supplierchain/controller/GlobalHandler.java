@@ -46,4 +46,12 @@ public class GlobalHandler {
         errors.put("status", "500");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errors);
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<HashMap<String, String>> handleIllegalArgument(IllegalArgumentException ex) {
+        HashMap<String, String> errors = new HashMap<>();
+        errors.put("error", ex.getMessage());
+        errors.put("status", "400");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    }
 }

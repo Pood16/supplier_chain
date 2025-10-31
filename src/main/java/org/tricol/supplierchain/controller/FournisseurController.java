@@ -31,4 +31,12 @@ public class FournisseurController {
         return ResponseEntity.ok(fournisseurs);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteFournisseur(@PathVariable Long id) {
+        fournisseurService.deleteFournisseur(id);
+        return ResponseEntity.ok("Fournisseur avec id " +id +" est supprimé" );
+    }
+
+
+
 }
