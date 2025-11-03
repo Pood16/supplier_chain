@@ -23,7 +23,7 @@ CREATE TABLE produits (
     prix_unitaire DOUBLE NOT NULL,
     categorie VARCHAR(100) NOT NULL,
     stock_actuel DECIMAL(19,2) NOT NULL,
-    point_commande INT NOT NULL, /* Change this from int to BigDecimal*/
+    point_commande DECIMAL(19,2) NOT NULL,
     unite_mesure VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL
