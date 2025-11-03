@@ -3,6 +3,7 @@ package org.tricol.supplierchain.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "mouvements_stock")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class MouvementStock {
