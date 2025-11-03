@@ -11,7 +11,7 @@ import org.tricol.supplierchain.service.inter.FournisseurService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/fournisseurs")
+@RequestMapping("/api/v1/fournisseurs")
 @RequiredArgsConstructor
 public class FournisseurController {
 

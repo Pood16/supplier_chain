@@ -4,6 +4,7 @@ package org.tricol.supplierchain.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -27,7 +28,7 @@ public class Produit {
     private Double prixUnitaire; 
 
     @Column(name = "stock_actuel", nullable = false)
-    private int stockActuel; 
+    private BigDecimal stockActuel;
 
     @Column(name = "point_commande", nullable = false)
     private int pointCommande;
