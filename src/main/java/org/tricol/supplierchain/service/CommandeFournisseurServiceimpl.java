@@ -165,7 +165,7 @@ public class CommandeFournisseurServiceimpl implements CommandeFournisseurServic
             Produit produit = ligne.getProduit();
 
             LotStock lot = new LotStock();
-            lot.setNumeroLot(generateLotKey());
+            lot.setNumeroLot("LOT-"+UUID.randomUUID());
             lot.setProduit(produit);
             lot.setCommande(commande);
             lot.setQuantiteInitiale(ligne.getQuantite());
@@ -177,9 +177,9 @@ public class CommandeFournisseurServiceimpl implements CommandeFournisseurServic
             lotStockRepository.save(lot);
 
             MouvementStock mouvement = new MouvementStock();
+            mouvement.setLotStock(lot);
             mouvement.setDateMouvement(now);
             mouvement.setMotif("RECEPTION_COMMANDE");
-            mouvement.setLotStock(lot);
             mouvement.setTypeMouvement(TypeMouvement.ENTREE);
             mouvement.setProduit(produit);
             mouvement.setQuantite(ligne.getQuantite());
@@ -201,9 +201,5 @@ public class CommandeFournisseurServiceimpl implements CommandeFournisseurServic
         return commandeFournisseurMapper.toResponseDto(receivedCommande);
     }
 
-
-    private String generateLotKey(){
-        return "LOT-"+UUID.randomUUID();
-    }
 
 }

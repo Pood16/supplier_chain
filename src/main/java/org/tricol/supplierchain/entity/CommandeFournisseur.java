@@ -16,7 +16,6 @@ import java.util.List;
 @Entity
 @Table(name = "commande_fournisseur")
 @Data
-@Component
 public class CommandeFournisseur {
 
     @Id
