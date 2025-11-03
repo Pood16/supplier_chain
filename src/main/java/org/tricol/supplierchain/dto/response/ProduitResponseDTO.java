@@ -2,6 +2,7 @@ package org.tricol.supplierchain.dto.response;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -17,9 +18,9 @@ public class ProduitResponseDTO {
 
     private Double prixUnitaire;
 
-    private int stockActuel;
+    private BigDecimal stockActuel;
 
-    private int pointCommande;
+    private BigDecimal pointCommande;
 
     private String uniteMesure;
 

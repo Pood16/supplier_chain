@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -26,11 +27,11 @@ public class ProduitRequestDTO {
 
     @NotNull(message = "le stock actuel est obligatoire")
     @Min(value = 0, message = "le stock actuel doit être positif")
-    private int stockActuel;
+    private BigDecimal stockActuel;
 
     @NotNull(message = "le point de commande est obligatoire")
     @Min(value = 0, message = "le point de commande doit être positif")
-    private int pointCommande;
+    private BigDecimal pointCommande;
 
     @NotBlank(message = "l'unité de mesure est obligatoire")
     private String uniteMesure;

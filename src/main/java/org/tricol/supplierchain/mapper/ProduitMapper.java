@@ -13,7 +13,7 @@ public interface ProduitMapper {
     Produit toEntity(ProduitRequestDTO produitRequestDTO);
     ProduitResponseDTO toResponseDTO(Produit produit);
 
-    //@BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-   // void updateEntityFromDto(ProduitUpdatDTO produitUpdatDTO, @MappingTarget Produit produit);
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateEntityFromDto(ProduitUpdatDTO produitUpdatDTO, @MappingTarget Produit produit);
 
 }
