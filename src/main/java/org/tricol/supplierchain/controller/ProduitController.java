@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.tricol.supplierchain.dto.request.ProduitRequestDTO;
+import org.tricol.supplierchain.dto.request.ProduitUpdatDTO;
 import org.tricol.supplierchain.dto.response.ProduitResponseDTO;
 import org.tricol.supplierchain.service.inter.Produitservice;
 
@@ -41,6 +42,12 @@ public class ProduitController {
     public ResponseEntity<Void> deleteProduit(@PathVariable Long id){
         produitservice.deleteProduit(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ProduitResponseDTO> updateProduit(@PathVariable Long id, @Valid @RequestBody ProduitUpdatDTO produitUpdatDTO) {
+        ProduitResponseDTO updatedProduit = produitservice.modifierProduit(id, produitUpdatDTO);
+        return ResponseEntity.ok(updatedProduit);
     }
 
 

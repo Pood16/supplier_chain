@@ -3,6 +3,8 @@ package org.tricol.supplierchain.dto.request;
 import jakarta.validation.constraints.Min;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 
 @Data
 public class ProduitUpdatDTO {
@@ -16,10 +18,10 @@ public class ProduitUpdatDTO {
     private Double prixUnitaire;
 
     @Min(value = 0, message = "le stock actuel doit être positif")
-    private int stockActuel;
+    private BigDecimal stockActuel;
 
     @Min(value = 0, message = "le point de commande doit être positif")
-    private int pointCommande;
+    private BigDecimal pointCommande;
 
     private String uniteMesure;
 

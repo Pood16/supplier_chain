@@ -3,6 +3,7 @@ package org.tricol.supplierchain.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.tricol.supplierchain.dto.request.ProduitRequestDTO;
+import org.tricol.supplierchain.dto.request.ProduitUpdatDTO;
 import org.tricol.supplierchain.dto.response.ProduitResponseDTO;
 import org.tricol.supplierchain.entity.Produit;
 import org.tricol.supplierchain.exception.DuplicateResourceException;
@@ -32,8 +33,11 @@ public class ProduitServiceImpl implements Produitservice {
     }
 
     @Override
-    public ProduitResponseDTO modifierProduit(Long id, ProduitRequestDTO produitRequestDTO) {
-        return null;
+    public ProduitResponseDTO modifierProduit(Long id, ProduitUpdatDTO produitUpdatDTO) {
+        Produit produit = produitRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Produit avec id " + id + " n'existe pas"));
+        produitMapper.updateEntityFromDto(produitUpdatDTO, produit);
+        return produitMapper.toResponseDTO(produitRepository.save(produit));
     }
 
     @Override
