@@ -1,5 +1,7 @@
 package org.tricol.supplierchain.service;
 
+import lombok.Builder;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +28,9 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@Data
 @RequiredArgsConstructor
+@Builder
 @Transactional
 public class CommandeFournisseurServiceimpl implements CommandeFournisseurService {
 
@@ -35,10 +39,10 @@ public class CommandeFournisseurServiceimpl implements CommandeFournisseurServic
     private final FournisseurRepository fournisseurRepository;
     private final LigneCommandeRepository ligneCommandeRepository;
     private final ProduitRepository produitRepository;
-    private final CommandeFournisseurMapper commandeFournisseurMapper;
-    private final LigneCommandeMapper ligneCommandeMapper;
     private final LotStockRepository lotStockRepository;
     private final MouvementStockRepository mouvementStockRepository;
+    private final CommandeFournisseurMapper commandeFournisseurMapper;
+    private final LigneCommandeMapper ligneCommandeMapper;
 
     @Override
     @Transactional(readOnly = true)
@@ -66,12 +70,13 @@ public class CommandeFournisseurServiceimpl implements CommandeFournisseurServic
         for (LigneCommandeRequestDTO ligneDTO : requestDTO.getLignes()){
             Produit produit = produitRepository
                     .findById(ligneDTO.getProduitId())
-                    .orElseThrow(() -> new ResourceNotFoundException("No Product with ID: " + ligneDTO.getProduitId()));
-            LigneCommande ligne = new LigneCommande();
-            ligne.setProduit(produit);
-            ligne.setCommande(commande);
-            ligne.setQuantite(ligneDTO.getQuantite());
-            ligne.setPrixUnitaire(ligneDTO.getPrixUnitaire());
+                    .orElseThrow(() -> new ResourceNotFoundException("Pas de produit avec ID: " + ligneDTO.getProduitId()));
+            LigneCommande ligne = LigneCommande.builder()
+                    .produit(produit)
+                    .commande(commande)
+                    .quantite(ligneDTO.getQuantite())
+                    .prixUnitaire(ligneDTO.getPrixUnitaire())
+                    .build();
             ligne.calculerMontantTotal();
             lignesCommandes.add(ligne);
         }
@@ -107,10 +112,6 @@ public class CommandeFournisseurServiceimpl implements CommandeFournisseurServic
 
     @Override
     public CommandeFournisseurResponseDTO getCommandeById(Long id){
-
-        if (id == null || id == 0){
-            throw new IllegalArgumentException("Invalid commande ID");
-        }
 
         CommandeFournisseur commande = commandeFournisseurRepository
                 .findById(id)
@@ -163,28 +164,29 @@ public class CommandeFournisseurServiceimpl implements CommandeFournisseurServic
         for (LigneCommande ligne: commande.getLignesCommande()){
             Produit produit = ligne.getProduit();
 
-            LotStock lot = new LotStock();
-            lot.setNumeroLot("LOT-"+UUID.randomUUID());
-            lot.setProduit(produit);
-            lot.setCommande(commande);
-            lot.setQuantiteInitiale(ligne.getQuantite());
-            lot.setQuantiteRestante(ligne.getQuantite());
-            lot.setPrixUnitaireAchat(ligne.getPrixUnitaire());
-            lot.setDateEntree(now);
-            lot.setStatut(StatutLot.ACTIF);
-
+            LotStock lot = LotStock.builder()
+                    .numeroLot("LOT-"+UUID.randomUUID())
+                    .produit(produit)
+                    .commande(commande)
+                    .quantiteInitiale(ligne.getQuantite())
+                    .quantiteRestante(ligne.getQuantite())
+                    .prixUnitaireAchat(ligne.getPrixUnitaire())
+                    .statut(StatutLot.ACTIF)
+                    .dateEntree(now)
+                    .build();
             lotStockRepository.save(lot);
 
-            MouvementStock mouvement = new MouvementStock();
-            mouvement.setLotStock(lot);
-            mouvement.setDateMouvement(now);
-            mouvement.setMotif("RECEPTION_COMMANDE");
-            mouvement.setTypeMouvement(TypeMouvement.ENTREE);
-            mouvement.setProduit(produit);
-            mouvement.setQuantite(ligne.getQuantite());
-            mouvement.setReference(commande.getNumeroCommande());
-
+            MouvementStock mouvement = MouvementStock.builder()
+                    .lotStock(lot)
+                    .dateMouvement(now)
+                    .motif("RECEPTION_COMMANDE")
+                    .typeMouvement(TypeMouvement.ENTREE)
+                    .produit(produit)
+                    .quantite(ligne.getQuantite())
+                    .reference(commande.getNumeroCommande())
+                    .build();
             mouvementStockRepository.save(mouvement);
+
 
             produit.setStockActuel(produit.getStockActuel().add(ligne.getQuantite()));
 

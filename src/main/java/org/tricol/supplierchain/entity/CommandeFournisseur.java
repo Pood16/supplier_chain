@@ -2,8 +2,10 @@ package org.tricol.supplierchain.entity;
 
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import org.springframework.stereotype.Component;
+import lombok.NoArgsConstructor;
 import org.tricol.supplierchain.enums.StatutCommande;
 
 
@@ -16,6 +18,9 @@ import java.util.List;
 @Entity
 @Table(name = "commande_fournisseur")
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CommandeFournisseur {
 
     @Id
