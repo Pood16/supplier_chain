@@ -2,8 +2,7 @@ package org.tricol.supplierchain.entity;
 
 
 import jakarta.persistence.*;
-import lombok.Data;
-import org.springframework.stereotype.Component;
+import lombok.*;
 import org.tricol.supplierchain.enums.StatutCommande;
 
 
@@ -13,9 +12,14 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Setter
+@Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString(exclude = "lignesCommande")
 @Entity
 @Table(name = "commande_fournisseur")
-@Data
 public class CommandeFournisseur {
 
     @Id
@@ -68,13 +72,10 @@ public class CommandeFournisseur {
 
     public void addLigneCommande(LigneCommande ligne) {
         lignesCommande.add(ligne);
-        ligne.setCommande(this);
-        calculerMontantTotal();
     }
 
     public void removeLigneCommande(LigneCommande ligne) {
         lignesCommande.remove(ligne);
-        ligne.setCommande(null);
         calculerMontantTotal();
     }
 

@@ -8,9 +8,14 @@ import lombok.*;
 import java.math.BigDecimal;
 
 
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString(exclude = "commande")
 @Entity
 @Table(name = "lignes_commande")
-@Data
 public class LigneCommande {
 
     @Id

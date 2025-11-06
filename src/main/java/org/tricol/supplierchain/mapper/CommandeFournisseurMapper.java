@@ -11,10 +11,10 @@ import org.tricol.supplierchain.entity.CommandeFournisseur;
 @Mapper(componentModel = "spring", uses = {LigneCommandeMapper.class, FournisseurMapper.class})
 public interface CommandeFournisseurMapper {
 
-    // Create
+
     CommandeFournisseur toEntity(CommandeFournisseurCreateDTO dto);
 
-    // Update:
+
     void updateEntityFromDto(CommandeFournisseurUpdateDTO dto, @MappingTarget CommandeFournisseur entity);
 
     CommandeFournisseurResponseDTO toResponseDto(CommandeFournisseur entity);

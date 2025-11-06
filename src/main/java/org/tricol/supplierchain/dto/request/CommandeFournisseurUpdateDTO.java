@@ -16,11 +16,14 @@ import java.util.List;
 @AllArgsConstructor
 public class CommandeFournisseurUpdateDTO {
 
+
+    private Long fournisseurId;
+
     @NotNull(message = "La date de livraison prévue est obligatoire")
     private LocalDate dateLivraisonPrevue;
 
     @Valid
     @NotNull(message = "Les lignes de commande sont obligatoires")
     @Size(min = 1, message = "La commande doit contenir au moins une ligne")
-    private List<LigneCommandeRequestDTO> lignes;
+    private List<LigneCommandeCreateDTO> lignes;
 }

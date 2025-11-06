@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class LigneCommandeRequestDTO {
+public class LigneCommandeCreateDTO {
 
     @NotNull(message = "L'identifiant du produit est obligatoire")
     private Long produitId;
