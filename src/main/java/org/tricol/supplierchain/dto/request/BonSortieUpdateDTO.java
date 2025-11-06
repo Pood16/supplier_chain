@@ -2,6 +2,7 @@ package org.tricol.supplierchain.dto.request;
 
 import jakarta.validation.Valid;
 import lombok.Data;
+import org.tricol.supplierchain.enums.Atelier;
 import org.tricol.supplierchain.enums.MotifBonSortie;
 import org.tricol.supplierchain.enums.StatutBonSortie;
 
@@ -18,7 +19,8 @@ public class BonSortieUpdateDTO {
 
     private MotifBonSortie motif;
 
+    private Atelier atelier;
+
     @Valid
     private List<LigneBonSortieRequestDTO> ligneBonSorties;
 }
-

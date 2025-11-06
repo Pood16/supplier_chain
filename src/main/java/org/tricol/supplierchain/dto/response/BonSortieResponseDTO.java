@@ -1,6 +1,7 @@
 package org.tricol.supplierchain.dto.response;
 
 import lombok.Data;
+import org.tricol.supplierchain.enums.Atelier;
 import org.tricol.supplierchain.enums.MotifBonSortie;
 import org.tricol.supplierchain.enums.StatutBonSortie;
 
@@ -21,10 +22,11 @@ public class BonSortieResponseDTO {
 
     private MotifBonSortie motif;
 
+    private Atelier atelier;
+
     private LocalDateTime dateCreation;
 
     private LocalDateTime dateModification;
 
     private List<LigneBonSortieResponseDTO> ligneBonSorties;
 }
-

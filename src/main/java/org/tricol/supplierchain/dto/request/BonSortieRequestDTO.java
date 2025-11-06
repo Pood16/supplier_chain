@@ -1,12 +1,11 @@
 package org.tricol.supplierchain.dto.request;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import org.tricol.supplierchain.enums.Atelier;
 import org.tricol.supplierchain.enums.MotifBonSortie;
-import org.tricol.supplierchain.enums.StatutBonSortie;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -20,6 +19,9 @@ public class BonSortieRequestDTO {
 
     @NotNull(message = "Le motif est obligatoire")
     private MotifBonSortie motif;
+
+    @NotNull(message = "L'atelier est obligatoire")
+    private Atelier atelier;
 
     @NotEmpty(message = "La liste des lignes de bon de sortie ne peut pas être vide")
     @Valid

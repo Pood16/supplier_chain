@@ -8,6 +8,7 @@ import org.tricol.supplierchain.dto.response.BonSortieResponseDTO;
 import org.tricol.supplierchain.entity.BonSortie;
 import org.tricol.supplierchain.entity.LigneBonSortie;
 import org.tricol.supplierchain.entity.Produit;
+import org.tricol.supplierchain.enums.Atelier;
 import org.tricol.supplierchain.enums.StatutBonSortie;
 import org.tricol.supplierchain.exception.BusinessException;
 import org.tricol.supplierchain.exception.ResourceNotFoundException;
@@ -49,6 +50,7 @@ public class BonSortieServiceImpl implements BonSortieService {
         bonSortie.setLigneBonSorties(ligneBonSortie);
         bonSortie.setStatut(StatutBonSortie.BROUILLON);
         bonSortie.setMotif(requestDTO.getMotif());
+        bonSortie.setAtelier(requestDTO.getAtelier());
 
         BonSortie savedBonSortie = bonSortieRepository.save(bonSortie);
 
@@ -58,10 +60,14 @@ public class BonSortieServiceImpl implements BonSortieService {
 
     @Override
     public List<BonSortieResponseDTO> getBonSorties() {
-        return bonSortieRepository.findAll()
+        List<BonSortieResponseDTO> Bons = bonSortieRepository.findAll()
                 .stream()
                 .map(bonSortieMapper::toResponseDTO)
                 .toList();
+        if (Bons.isEmpty()) {
+            throw new ResourceNotFoundException("Aucun bon de sortie trouvé.");
+        }
+        return Bons;
     }
 
     @Override
@@ -79,6 +85,19 @@ public class BonSortieServiceImpl implements BonSortieService {
             throw new BusinessException("Seul les bons de sortie en statut BROUILLON peuvent être supprimés.");
         }
         bonSortieRepository.delete(bonSortie);
+    }
+
+    @Override
+    public List<BonSortieResponseDTO> getBonSortiesByAtelier(Atelier atelier) {
+        List<BonSortieResponseDTO> Bons = bonSortieRepository.findByAtelier(atelier)
+                .stream()
+                .map(bonSortieMapper::toResponseDTO)
+                .toList();
+        if (Bons.isEmpty()) {
+            throw new ResourceNotFoundException("Aucun bon de sortie trouvé pour l'atelier " + atelier);
+        }
+
+        return Bons;
     }
 
 
