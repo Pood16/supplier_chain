@@ -2,10 +2,7 @@ package org.tricol.supplierchain.entity;
 
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.tricol.supplierchain.enums.StatutCommande;
 
 
@@ -15,12 +12,14 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "commande_fournisseur")
-@Data
+@Setter
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = "lignesCommande")
+@Entity
+@Table(name = "commande_fournisseur")
 public class CommandeFournisseur {
 
     @Id
@@ -73,13 +72,10 @@ public class CommandeFournisseur {
 
     public void addLigneCommande(LigneCommande ligne) {
         lignesCommande.add(ligne);
-        ligne.setCommande(this);
-        calculerMontantTotal();
     }
 
     public void removeLigneCommande(LigneCommande ligne) {
         lignesCommande.remove(ligne);
-        ligne.setCommande(null);
         calculerMontantTotal();
     }
 
