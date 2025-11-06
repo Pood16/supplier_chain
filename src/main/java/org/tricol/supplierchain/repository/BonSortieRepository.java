@@ -6,6 +6,6 @@ import org.tricol.supplierchain.entity.BonSortie;
 
 
 @Repository
-public interface BonSortieRepository extends JpaRepository<BonSortie, Integer> {
+public interface BonSortieRepository extends JpaRepository<BonSortie, Long> {
 
 }

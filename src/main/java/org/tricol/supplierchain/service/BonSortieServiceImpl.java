@@ -54,4 +54,19 @@ public class BonSortieServiceImpl implements BonSortieService {
         return  bonSortieMapper.toResponseDTO(savedBonSortie);
 
     }
+
+    @Override
+    public List<BonSortieResponseDTO> getBonSorties() {
+        return bonSortieRepository.findAll()
+                .stream()
+                .map(bonSortieMapper::toResponseDTO)
+                .toList();
+    }
+
+    @Override
+    public BonSortieResponseDTO getBonSortieById(Long id) {
+        BonSortie bonSortie = bonSortieRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Bon de sortie non trouvé avec l'id " + id));
+        return bonSortieMapper.toResponseDTO(bonSortie);
+    }
 }
