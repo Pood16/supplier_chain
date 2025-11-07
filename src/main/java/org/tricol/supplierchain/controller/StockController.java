@@ -7,9 +7,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.tricol.supplierchain.dto.response.MouvementStockResponseDTO;
 import org.tricol.supplierchain.dto.response.StockGlobalResponseDTO;
 import org.tricol.supplierchain.dto.response.StockProduitResponseDTO;
 import org.tricol.supplierchain.service.inter.GestionStock;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/stock")
@@ -28,5 +31,10 @@ public class StockController {
             @PathVariable Long id
     ){
         return ResponseEntity.ok(stockService.getStockByProduit(id));
+    }
+
+    @GetMapping("/mouvements")
+    public ResponseEntity<List<MouvementStockResponseDTO>> getMouvementsHistorique(){
+        return ResponseEntity.ok(stockService.getHistoriqueMouvements());
     }
 }

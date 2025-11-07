@@ -18,6 +18,7 @@ import org.tricol.supplierchain.repository.ProduitRepository;
 import org.tricol.supplierchain.service.inter.GestionStock;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -71,7 +72,12 @@ public class GestionStockImpl implements GestionStock {
 
     @Override
     public List<MouvementStockResponseDTO> getHistoriqueMouvements() {
-        return List.of();
+
+        return mouvementStockRepository.findAll()
+                .stream()
+                .map(mouvementStockMapper::toResponseDTO)
+                .sorted(Comparator.comparing(MouvementStockResponseDTO::getDateMouvement))
+                .toList();
     }
 
     @Override

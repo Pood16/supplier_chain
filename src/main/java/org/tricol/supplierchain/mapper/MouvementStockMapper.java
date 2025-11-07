@@ -12,5 +12,5 @@ public interface MouvementStockMapper {
     @Mapping(source = "produit.reference", target = "referenceProduit")
     @Mapping(source = "produit.nom", target = "nomProduit")
     @Mapping(source = "lotStock.numeroLot" ,target = "numeroLot")
-    MouvementStockResponseDTO stockResponseDTO(MouvementStock mouvementStock);
+    MouvementStockResponseDTO toResponseDTO(MouvementStock mouvementStock);
 }
