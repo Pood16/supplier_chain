@@ -8,6 +8,7 @@ import org.tricol.supplierchain.dto.response.*;
 import org.tricol.supplierchain.entity.LotStock;
 import org.tricol.supplierchain.entity.Produit;
 import org.tricol.supplierchain.enums.StatutLot;
+import org.tricol.supplierchain.exception.ResourceNotFoundException;
 import org.tricol.supplierchain.mapper.LotStockMapper;
 import org.tricol.supplierchain.mapper.MouvementStockMapper;
 import org.tricol.supplierchain.mapper.StockMapper;
@@ -61,8 +62,11 @@ public class GestionStockImpl implements GestionStock {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public StockProduitResponseDTO getStockByProduit(Long produitId) {
-        return null;
+        Produit produit = produitRepository.findById(produitId)
+                .orElseThrow(()->new ResourceNotFoundException("Pas de produit avec cette ID: "+ produitId));
+        return buildStockProduitResponse(produit);
     }
 
     @Override
