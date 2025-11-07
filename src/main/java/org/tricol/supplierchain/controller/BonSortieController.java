@@ -59,4 +59,11 @@ public class BonSortieController {
         return ResponseEntity.ok(updatedBonSortie);
     }
 
+
+    @PutMapping("/annulation/{id}")
+    public ResponseEntity<String> annulationBonSortie(@PathVariable Long id) {
+        bonSortieService.annulationBonSortie(id);
+        return ResponseEntity.ok("Bon de sortie avec id " +id +" est annulé" );
+    }
+
 }

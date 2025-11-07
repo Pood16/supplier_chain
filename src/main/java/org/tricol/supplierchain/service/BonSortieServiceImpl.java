@@ -132,4 +132,15 @@ public class BonSortieServiceImpl implements BonSortieService {
 
         return bonSortieMapper.toResponseDTO(savedBonSortie);
     }
+
+    @Override
+    public void annulationBonSortie(Long id) {
+        BonSortie bonSortie = bonSortieRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Bon de sortie non trouvé avec l'id " + id));
+        if(bonSortie.getStatut() != StatutBonSortie.BROUILLON) {
+            throw new BusinessException("Seul les bons de sortie en statut BROUILLON peuvent être annulés.");
+        }
+        bonSortie.setStatut(StatutBonSortie.ANNULE);
+        bonSortieRepository.save(bonSortie);
+    }
 }

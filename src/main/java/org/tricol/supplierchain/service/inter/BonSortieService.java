@@ -20,4 +20,6 @@ public interface BonSortieService {
     List<BonSortieResponseDTO> getBonSortiesByAtelier(Atelier atelier);
 
     BonSortieResponseDTO updateBonSortie(Long id, BonSortieUpdateDTO requestDTO);
+
+    void annulationBonSortie(Long id);
 }
