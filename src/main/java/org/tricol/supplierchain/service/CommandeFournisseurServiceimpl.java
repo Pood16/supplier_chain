@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 @Service
 @Data
@@ -65,7 +66,8 @@ public class CommandeFournisseurServiceimpl implements CommandeFournisseurServic
 
         commande.setFournisseur(fournisseur);
 
-        commande.setNumeroCommande(UUID.randomUUID().toString());
+        Supplier<String> commandeNumber = () -> UUID.randomUUID().toString();
+        commande.setNumeroCommande(commandeNumber.get());
 
         commande.setLignesCommande(new ArrayList<>());
         for (LigneCommandeCreateDTO ligneDTO : createDTO.getLignes()){

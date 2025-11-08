@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.tricol.supplierchain.enums.StatutLot;
+import org.tricol.supplierchain.exception.BusinessException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -51,7 +52,29 @@ public class LotStock {
     @Enumerated(EnumType.STRING)
     private StatutLot statut;
 
-    // TODO: Helper to calculate the remaining quantity automatically -> note created by lahcen
+    public void consommer(BigDecimal quantite) {
+        if (quantite.compareTo(this.quantiteRestante) > 0) {
+            throw new BusinessException("Impossible de consommer plus que la quantité restante");
+        }
+        this.quantiteRestante = this.quantiteRestante.subtract(quantite);
+        if (this.quantiteRestante.compareTo(BigDecimal.ZERO) == 0) {
+            this.statut = StatutLot.EPUISE;
+        }
+    }
+
+    public boolean isEpuise() {
+        return this.statut == StatutLot.EPUISE ||
+                this.quantiteRestante.compareTo(BigDecimal.ZERO) == 0;
+    }
+
+    public boolean isActif() {
+        return this.statut == StatutLot.ACTIF &&
+                this.quantiteRestante.compareTo(BigDecimal.ZERO) > 0;
+    }
+
+    public BigDecimal getValorisation() {
+        return this.quantiteRestante.multiply(this.prixUnitaireAchat);
+    }
 
 
 }
