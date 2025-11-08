@@ -1,19 +1,20 @@
 package org.tricol.supplierchain.service.inter;
 
-import org.springframework.stereotype.Service;
 import org.tricol.supplierchain.dto.response.*;
+import org.tricol.supplierchain.entity.Fournisseur;
+import org.tricol.supplierchain.entity.Produit;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 
-public interface GestionStock {
+public interface GestionStockService {
 
     StockGlobalResponseDTO getStockGlobal();
     StockProduitResponseDTO getStockByProduit(Long produitId);
     List<MouvementStockResponseDTO> getHistoriqueMouvements();
     List<MouvementStockResponseDTO> getMouvementsByProduit(Long produitId);
-    List<AlerteStockResponseDTO> getAllAlerts();
+    CommandeFournisseurResponseDTO createCommandeFournisseurEnCasUrgente(Produit produit, Fournisseur fournisseur);
     ValorisationStockResponseDTO getValorisationTotale();
 
     boolean isStockSuffisant(Long produitId, BigDecimal quantiteRequise);

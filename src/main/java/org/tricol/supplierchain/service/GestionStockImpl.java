@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.tricol.supplierchain.dto.response.*;
+import org.tricol.supplierchain.entity.Fournisseur;
 import org.tricol.supplierchain.entity.LotStock;
 import org.tricol.supplierchain.entity.Produit;
 import org.tricol.supplierchain.enums.StatutLot;
@@ -15,7 +16,8 @@ import org.tricol.supplierchain.mapper.StockMapper;
 import org.tricol.supplierchain.repository.LotStockRepository;
 import org.tricol.supplierchain.repository.MouvementStockRepository;
 import org.tricol.supplierchain.repository.ProduitRepository;
-import org.tricol.supplierchain.service.inter.GestionStock;
+import org.tricol.supplierchain.service.inter.CommandeFournisseurService;
+import org.tricol.supplierchain.service.inter.GestionStockService;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
@@ -24,7 +26,7 @@ import java.util.List;
 @Service
 @Data
 @RequiredArgsConstructor
-public class GestionStockImpl implements GestionStock {
+public class GestionStockImpl implements GestionStockService {
 
 
     private final StockMapper stockMapper;
@@ -33,6 +35,8 @@ public class GestionStockImpl implements GestionStock {
     private final ProduitRepository produitRepository;
     private final LotStockRepository lotStockRepository;
     private final MouvementStockRepository mouvementStockRepository;
+    private final CommandeFournisseurService commandeFournisseurService;
+
 
 
     @Override
@@ -91,8 +95,9 @@ public class GestionStockImpl implements GestionStock {
     }
 
     @Override
-    public List<AlerteStockResponseDTO> getAllAlerts() {
-        return List.of();
+    public CommandeFournisseurResponseDTO createCommandeFournisseurEnCasUrgente(Produit produit, Fournisseur fournisseur) {
+
+        return null;
     }
 
     @Override
