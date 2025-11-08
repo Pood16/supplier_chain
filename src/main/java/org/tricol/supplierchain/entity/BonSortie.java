@@ -6,6 +6,7 @@ import org.tricol.supplierchain.enums.Atelier;
 import org.tricol.supplierchain.enums.MotifBonSortie;
 import org.tricol.supplierchain.enums.StatutBonSortie;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -41,8 +42,12 @@ public class BonSortie {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime dateModification;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "bonSortie", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LigneBonSortie> ligneBonSorties = new ArrayList<>();
+
+    @Column(name = "montant_total", nullable = false)
+    private BigDecimal montantTotal = BigDecimal.ZERO;
 
     @PrePersist
     public void prePersist() {

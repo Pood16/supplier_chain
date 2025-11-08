@@ -5,6 +5,7 @@ import org.tricol.supplierchain.enums.Atelier;
 import org.tricol.supplierchain.enums.MotifBonSortie;
 import org.tricol.supplierchain.enums.StatutBonSortie;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,4 +30,6 @@ public class BonSortieResponseDTO {
     private LocalDateTime dateModification;
 
     private List<LigneBonSortieResponseDTO> ligneBonSorties;
+
+    private BigDecimal montantTotal;
 }
