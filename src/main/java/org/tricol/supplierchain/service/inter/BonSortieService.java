@@ -3,6 +3,7 @@ package org.tricol.supplierchain.service.inter;
 import org.tricol.supplierchain.dto.request.BonSortieRequestDTO;
 import org.tricol.supplierchain.dto.request.BonSortieUpdateDTO;
 import org.tricol.supplierchain.dto.response.BonSortieResponseDTO;
+import org.tricol.supplierchain.entity.BonSortie;
 import org.tricol.supplierchain.enums.Atelier;
 
 import java.util.List;
@@ -24,4 +25,6 @@ public interface BonSortieService {
     void annulationBonSortie(Long id);
 
     BonSortieResponseDTO validationBonSortie(Long id);
+
+    BonSortieResponseDTO performActualValidation(BonSortie bonSortie);
 }

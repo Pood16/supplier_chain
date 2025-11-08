@@ -7,18 +7,22 @@ import org.tricol.supplierchain.dto.request.BonSortieRequestDTO;
 import org.tricol.supplierchain.dto.request.BonSortieUpdateDTO;
 import org.tricol.supplierchain.dto.request.LigneBonSortieRequestDTO;
 import org.tricol.supplierchain.dto.response.BonSortieResponseDTO;
+import org.tricol.supplierchain.dto.response.CommandeFournisseurResponseDTO;
+import org.tricol.supplierchain.dto.response.DeficitStockResponseDTO;
 import org.tricol.supplierchain.entity.*;
 import org.tricol.supplierchain.enums.Atelier;
 import org.tricol.supplierchain.enums.StatutBonSortie;
 import org.tricol.supplierchain.enums.TypeMouvement;
 import org.tricol.supplierchain.exception.BusinessException;
 import org.tricol.supplierchain.exception.ResourceNotFoundException;
+import org.tricol.supplierchain.exception.StockInsuffisantException;
 import org.tricol.supplierchain.mapper.BonSortieMapper;
 import org.tricol.supplierchain.repository.BonSortieRepository;
 import org.tricol.supplierchain.repository.LotStockRepository;
 import org.tricol.supplierchain.repository.MouvementStockRepository;
 import org.tricol.supplierchain.repository.ProduitRepository;
 import org.tricol.supplierchain.service.inter.BonSortieService;
+import org.tricol.supplierchain.service.inter.GestionStockService;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -28,7 +32,6 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
-@Transactional
 public class BonSortieServiceImpl implements BonSortieService {
 
     private final BonSortieRepository bonSortieRepository;
@@ -36,6 +39,7 @@ public class BonSortieServiceImpl implements BonSortieService {
     private  final LotStockRepository  lotStockRepository;
     private final MouvementStockRepository mouvementStockRepository;
     private final BonSortieMapper bonSortieMapper;
+    private final GestionStockService gestionStockService;
 
 
     @Override
@@ -67,6 +71,7 @@ public class BonSortieServiceImpl implements BonSortieService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<BonSortieResponseDTO> getBonSorties() {
         List<BonSortieResponseDTO> Bons = bonSortieRepository.findAll()
                 .stream()
@@ -79,6 +84,7 @@ public class BonSortieServiceImpl implements BonSortieService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public BonSortieResponseDTO getBonSortieById(Long id) {
         BonSortie bonSortie = bonSortieRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Bon de sortie non trouvé avec l'id " + id));
@@ -86,6 +92,7 @@ public class BonSortieServiceImpl implements BonSortieService {
     }
 
     @Override
+    @Transactional
     public void deleteBonSortie(Long id) {
         BonSortie bonSortie = bonSortieRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Bon de sortie non trouvé avec l'id " + id));
@@ -96,6 +103,7 @@ public class BonSortieServiceImpl implements BonSortieService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<BonSortieResponseDTO> getBonSortiesByAtelier(Atelier atelier) {
         List<BonSortieResponseDTO> Bons = bonSortieRepository.findByAtelier(atelier)
                 .stream()
@@ -109,6 +117,7 @@ public class BonSortieServiceImpl implements BonSortieService {
     }
 
     @Override
+    @Transactional
     public BonSortieResponseDTO updateBonSortie(Long id, BonSortieUpdateDTO requestDTO) {
         BonSortie existingBonSortie = bonSortieRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Bon de sortie non trouvé avec l'id " + id));
@@ -139,6 +148,7 @@ public class BonSortieServiceImpl implements BonSortieService {
     }
 
     @Override
+    @Transactional
     public void annulationBonSortie(Long id) {
         BonSortie bonSortie = bonSortieRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Bon de sortie non trouvé avec l'id " + id));
@@ -157,6 +167,20 @@ public class BonSortieServiceImpl implements BonSortieService {
         if(bonSortie.getStatut() != StatutBonSortie.BROUILLON) {
             throw new BusinessException("Seul les bons de sortie en statut BROUILLON peuvent être annulés.");
         }
+
+        List<DeficitStockResponseDTO> deficits = gestionStockService.verifyStockPourBonSortie(bonSortie);
+
+        if (!deficits.isEmpty()){
+            List<CommandeFournisseurResponseDTO> commandes =  gestionStockService.createCommandeFournisseurEnCasUrgente(deficits);
+            throw new StockInsuffisantException(bonSortie.getNumeroBon(), deficits);
+        }
+
+        return performActualValidation(bonSortie);
+    }
+
+    @Override
+    @Transactional
+    public BonSortieResponseDTO performActualValidation(BonSortie bonSortie){
         BigDecimal montantTotal = BigDecimal.ZERO;
 
         for(LigneBonSortie ligne :  bonSortie.getLigneBonSorties()) {
@@ -214,6 +238,6 @@ public class BonSortieServiceImpl implements BonSortieService {
         bonSortie.setMontantTotal(montantTotal);
         bonSortie.setStatut(StatutBonSortie.VALIDE);
         bonSortieRepository.save(bonSortie);
-       return  bonSortieMapper.toResponseDTO(bonSortie);
+        return  bonSortieMapper.toResponseDTO(bonSortie);
     }
 }

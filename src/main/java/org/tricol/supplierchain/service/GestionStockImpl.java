@@ -4,24 +4,26 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.tricol.supplierchain.dto.request.CommandeFournisseurCreateDTO;
+import org.tricol.supplierchain.dto.request.LigneCommandeCreateDTO;
 import org.tricol.supplierchain.dto.response.*;
-import org.tricol.supplierchain.entity.Fournisseur;
-import org.tricol.supplierchain.entity.LotStock;
-import org.tricol.supplierchain.entity.Produit;
+import org.tricol.supplierchain.entity.*;
 import org.tricol.supplierchain.enums.StatutLot;
 import org.tricol.supplierchain.exception.ResourceNotFoundException;
 import org.tricol.supplierchain.mapper.LotStockMapper;
 import org.tricol.supplierchain.mapper.MouvementStockMapper;
 import org.tricol.supplierchain.mapper.StockMapper;
-import org.tricol.supplierchain.repository.LotStockRepository;
-import org.tricol.supplierchain.repository.MouvementStockRepository;
-import org.tricol.supplierchain.repository.ProduitRepository;
+import org.tricol.supplierchain.repository.*;
 import org.tricol.supplierchain.service.inter.CommandeFournisseurService;
 import org.tricol.supplierchain.service.inter.GestionStockService;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Data
@@ -36,7 +38,9 @@ public class GestionStockImpl implements GestionStockService {
     private final LotStockRepository lotStockRepository;
     private final MouvementStockRepository mouvementStockRepository;
     private final CommandeFournisseurService commandeFournisseurService;
-
+    private final CommandeFournisseurRepository commandeFournisseurRepository;
+    private final FournisseurRepository fournisseurRepository;
+    private final LigneCommandeRepository ligneCommandeRepository;
 
 
     @Override
@@ -95,12 +99,6 @@ public class GestionStockImpl implements GestionStockService {
     }
 
     @Override
-    public CommandeFournisseurResponseDTO createCommandeFournisseurEnCasUrgente(Produit produit, Fournisseur fournisseur) {
-
-        return null;
-    }
-
-    @Override
     public ValorisationStockResponseDTO getValorisationTotale() {
         return null;
     }
@@ -112,7 +110,82 @@ public class GestionStockImpl implements GestionStockService {
 
     @Override
     public BigDecimal getQuantiteDisponible(Long produitId) {
+        Produit produit = produitRepository.findById(produitId)
+                .orElseThrow(()->new ResourceNotFoundException("Produit non trouve"));
+        return produit.getStockActuel();
+    }
+
+    @Override
+    public List<CommandeFournisseurResponseDTO> createCommandeFournisseurEnCasUrgente(List<DeficitStockResponseDTO> deficits) {
+
+        Map<Long, List<DeficitStockResponseDTO>> deficitsByFournisseur = deficits
+                .stream()
+                .filter(deficit -> deficit.getFournisseurId() != null)
+                .collect(Collectors.groupingBy(DeficitStockResponseDTO::getFournisseurId));
+
+        List<CommandeFournisseurResponseDTO> commandesCree = new ArrayList<>();
+
+        deficitsByFournisseur.forEach( (key, value) -> {
+            List<LigneCommandeCreateDTO> lignes = value
+                    .stream()
+                    .map(deficit -> LigneCommandeCreateDTO
+                            .builder()
+                            .prixUnitaire(getDernierePrixAchat(key, deficit.getProduitId()))
+                            .produitId(deficit.getProduitId())
+                            .quantite(deficit.getQuantiteManquante().add(new BigDecimal("100.00")))
+                            .build()
+                    ).toList();
+            CommandeFournisseurCreateDTO commandeDTO = CommandeFournisseurCreateDTO
+                    .builder()
+                    .fournisseurId(key)
+                    .dateLivraisonPrevue(LocalDate.now().plusDays(1))
+                    .lignes(lignes)
+                    .build();
+            CommandeFournisseurResponseDTO commande = commandeFournisseurService.createCommande(commandeDTO);
+            commandesCree.add(commande);
+        });
+        return commandesCree;
+    }
+
+    private Fournisseur getFirstSupplier(List<DeficitStockResponseDTO> deficits){
+
         return null;
+    }
+
+
+    @Override
+    public List<DeficitStockResponseDTO> verifyStockPourBonSortie(BonSortie bonSortie){
+        List<DeficitStockResponseDTO> deficits = new ArrayList<>();
+
+        for (LigneBonSortie ligne : bonSortie.getLigneBonSorties()){
+            BigDecimal stockDisponible = getQuantiteDisponible(ligne.getProduit().getId());
+            if (stockDisponible.compareTo(ligne.getQuantite()) < 0){
+                BigDecimal quantiteManquante = ligne.getQuantite().subtract(stockDisponible);
+                DeficitStockResponseDTO deficit = DeficitStockResponseDTO
+                        .builder()
+                        .produitId(ligne.getProduit().getId())
+                        .nomProduit(ligne.getProduit().getNom())
+                        .referenceProduit(ligne.getProduit().getReference())
+                        .quantiteDemandee(ligne.getQuantite())
+                        .quantiteDisponible(stockDisponible)
+                        .quantiteManquante(quantiteManquante)
+                        .fournisseurId(getFournisseursSuggeresPourProduit(ligne.getProduit().getId()).getId())
+                        .build();
+                deficits.add(deficit);
+            }
+        }
+        return deficits;
+    }
+
+    @Override
+    public Fournisseur getFournisseursSuggeresPourProduit(Long produitId){
+        List<CommandeFournisseur> commandePassees = commandeFournisseurRepository.findCommandesAvecProduit(produitId);
+        return commandePassees
+                .stream()
+                .map(CommandeFournisseur::getFournisseur)
+                .distinct()
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Pas de Fournisseur Pour ce produit"));
     }
 
     private StockProduitResponseDTO buildStockProduitResponse(Produit produit){
@@ -148,5 +221,11 @@ public class GestionStockImpl implements GestionStockService {
                 .stream()
                 .map(lot->lot.getQuantiteRestante().multiply(lot.getPrixUnitaireAchat()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private BigDecimal getDernierePrixAchat(Long produitId,Long fournisseurId){
+        return ligneCommandeRepository
+                .findDernierPrixAchat(produitId, fournisseurId)
+                .orElse(BigDecimal.ZERO);
     }
 }
