@@ -15,7 +15,7 @@ public interface GestionStockService {
     StockProduitResponseDTO getStockByProduit(Long produitId);
     List<MouvementStockResponseDTO> getHistoriqueMouvements();
     List<MouvementStockResponseDTO> getMouvementsByProduit(Long produitId);
-    ValorisationStockResponseDTO getValorisationTotale();
+    BigDecimal getValorisationTotale();
 
     boolean isStockSuffisant(Long produitId, BigDecimal quantiteRequise);
     BigDecimal getQuantiteDisponible(Long produitId);

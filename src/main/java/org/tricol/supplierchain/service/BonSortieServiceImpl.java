@@ -219,7 +219,9 @@ public class BonSortieServiceImpl implements BonSortieService {
                         .build();
                 mouvementStockRepository.save(mv);
 
-                lotStock.setQuantiteRestante(lotStock.getQuantiteRestante().subtract(quantiteALever));
+//                lotStock.setQuantiteRestante(lotStock.getQuantiteRestante().subtract(quantiteALever));
+//                lotStock.setQuantiteRestante(lotStock.getQuantiteRestante().subtract(quantiteALever));
+                lotStock.consommer(quantiteALever);
                 lotStockRepository.save(lotStock);
 
                 quantiteRestante = quantiteRestante.subtract(quantiteALever);

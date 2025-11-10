@@ -13,6 +13,7 @@ import org.tricol.supplierchain.dto.response.StockGlobalResponseDTO;
 import org.tricol.supplierchain.dto.response.StockProduitResponseDTO;
 import org.tricol.supplierchain.service.inter.GestionStockService;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -43,6 +44,11 @@ public class StockController {
     @GetMapping("/mouvements/produit/{id}")
     public ResponseEntity<List<MouvementStockResponseDTO>> getMouvementsByProduit(@PathVariable Long id){
         return ResponseEntity.ok(stockService.getMouvementsByProduit(id));
+    }
+
+    @GetMapping("/valorisation")
+    public ResponseEntity<BigDecimal> getValorisationTotale(){
+        return ResponseEntity.ok(stockService.getValorisationTotale());
     }
 
 }

@@ -52,7 +52,7 @@ public class LotStock {
     @Enumerated(EnumType.STRING)
     private StatutLot statut;
 
-    public void consommer(BigDecimal quantite) {
+    public BigDecimal consommer(BigDecimal quantite) {
         if (quantite.compareTo(this.quantiteRestante) > 0) {
             throw new BusinessException("Impossible de consommer plus que la quantité restante");
         }
@@ -60,6 +60,7 @@ public class LotStock {
         if (this.quantiteRestante.compareTo(BigDecimal.ZERO) == 0) {
             this.statut = StatutLot.EPUISE;
         }
+        return this.quantiteRestante;
     }
 
     public boolean isEpuise() {

@@ -99,8 +99,8 @@ public class GestionStockImpl implements GestionStockService {
     }
 
     @Override
-    public ValorisationStockResponseDTO getValorisationTotale() {
-        return null;
+    public BigDecimal getValorisationTotale() {
+        return calculerValorisationTotal();
     }
 
     @Override
@@ -145,11 +145,6 @@ public class GestionStockImpl implements GestionStockService {
             commandesCree.add(commande);
         });
         return commandesCree;
-    }
-
-    private Fournisseur getFirstSupplier(List<DeficitStockResponseDTO> deficits){
-
-        return null;
     }
 
 
