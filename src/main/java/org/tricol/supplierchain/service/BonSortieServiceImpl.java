@@ -29,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 @RequiredArgsConstructor
 @Service
@@ -243,4 +244,8 @@ public class BonSortieServiceImpl implements BonSortieService {
         bonSortieRepository.save(bonSortie);
         return  bonSortieMapper.toResponseDTO(bonSortie);
     }
+
+
+
+
 }

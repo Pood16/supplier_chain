@@ -68,14 +68,14 @@ class BonSortieServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        Produit produit = Produit
+        produit = Produit
                 .builder()
                 .id(1L)
                 .reference("PROD-001")
                 .stockActuel(BigDecimal.valueOf(150))
                 .build();
 
-        BonSortie bonSortie = BonSortie
+        bonSortie = BonSortie
                 .builder()
                 .id(1L)
                 .numeroBon("BS-001")
@@ -84,7 +84,8 @@ class BonSortieServiceImplTest {
                 .atelier(Atelier.ATELIER1)
                 .build();
 
-        LigneBonSortie ligne = LigneBonSortie.builder()
+        LigneBonSortie ligne = LigneBonSortie
+                .builder()
                 .produit(produit)
                 .quantite(new BigDecimal("100.00"))
                 .bonSortie(bonSortie)
@@ -132,9 +133,8 @@ class BonSortieServiceImplTest {
         ligne.setQuantite(new BigDecimal("30.00"));
 
         when(bonSortieRepository.findById(1L)).thenReturn(Optional.of(bonSortie));
-        when(gestionStockService.verifyStockPourBonSortie(any())).thenReturn(new ArrayList<>());
-        when(lotStockRepository.findByProduitIdOrderByDateEntreeAsc(1L))
-                .thenReturn(Arrays.asList(lotStock1, lotStock3, lotStock2));
+        when(gestionStockService.verifyStockPourBonSortie(any(BonSortie.class))).thenReturn(new ArrayList<>());
+        when(lotStockRepository.findByProduitIdOrderByDateEntreeAsc(1L)).thenReturn(Arrays.asList(lotStock1, lotStock3, lotStock2));
         when(bonSortieRepository.save(any(BonSortie.class))).thenReturn(bonSortie);
         when(bonSortieMapper.toResponseDTO(any(BonSortie.class))).thenReturn(BonSortieResponseDTO.builder().build());
 
@@ -142,10 +142,8 @@ class BonSortieServiceImplTest {
 
         assertNotNull(result);
 
-        
         ArgumentCaptor<MouvementStock> mouvementCaptor = ArgumentCaptor.forClass(MouvementStock.class);
         verify(mouvementStockRepository, times(1)).save(mouvementCaptor.capture());
-        
         MouvementStock mouvement = mouvementCaptor.getValue();
         assertEquals(TypeMouvement.SORTIE, mouvement.getTypeMouvement());
         assertEquals(new BigDecimal("30.00"), mouvement.getQuantite());
@@ -163,8 +161,7 @@ class BonSortieServiceImplTest {
 
         when(bonSortieRepository.findById(1L)).thenReturn(Optional.of(bonSortie));
         when(gestionStockService.verifyStockPourBonSortie(any())).thenReturn(new ArrayList<>());
-        when(lotStockRepository.findByProduitIdOrderByDateEntreeAsc(1L))
-                .thenReturn(Arrays.asList(lotStock1, lotStock3, lotStock2));
+        when(lotStockRepository.findByProduitIdOrderByDateEntreeAsc(1L)).thenReturn(Arrays.asList(lotStock1, lotStock3, lotStock2));
         when(bonSortieRepository.save(any(BonSortie.class))).thenReturn(bonSortie);
         when(bonSortieMapper.toResponseDTO(any(BonSortie.class))).thenReturn(BonSortieResponseDTO.builder().build());
 
@@ -178,8 +175,11 @@ class BonSortieServiceImplTest {
         List<MouvementStock> mouvements = mouvementCaptor.getAllValues();
         assertEquals(3, mouvements.size());
         assertEquals(new BigDecimal("50.00"), mouvements.get(0).getQuantite());
+        assertEquals(new BigDecimal("0.00"),mouvements.get(0).getLotStock().getQuantiteRestante());
         assertEquals(new BigDecimal("20.00"), mouvements.get(1).getQuantite());
+        assertEquals(new BigDecimal("0.00"),mouvements.get(1).getLotStock().getQuantiteRestante());
         assertEquals(new BigDecimal("30.00"), mouvements.get(2).getQuantite());
+        assertEquals(new BigDecimal("50.00"),mouvements.get(2).getLotStock().getQuantiteRestante());
 
         verify(lotStockRepository, times(3)).save(any(LotStock.class));
         verify(produitRepository, times(1)).save(any(Produit.class));
@@ -191,7 +191,8 @@ class BonSortieServiceImplTest {
         LigneBonSortie ligne = bonSortie.getLigneBonSorties().get(0);
         ligne.setQuantite(new BigDecimal("200.00"));
 
-        DeficitStockResponseDTO deficit = DeficitStockResponseDTO.builder()
+        DeficitStockResponseDTO deficit = DeficitStockResponseDTO
+                .builder()
                 .produitId(1L)
                 .quantiteDemandee(new BigDecimal("200.00"))
                 .quantiteDisponible(new BigDecimal("150.00"))
@@ -199,15 +200,15 @@ class BonSortieServiceImplTest {
                 .build();
 
         when(bonSortieRepository.findById(1L)).thenReturn(Optional.of(bonSortie));
-        when(gestionStockService.verifyStockPourBonSortie(any()))
-                .thenReturn(Arrays.asList(deficit));
+        when(gestionStockService.verifyStockPourBonSortie(any())).thenReturn(Arrays.asList(deficit));
 
-        assertThrows(StockInsuffisantException.class, () -> {
-            bonSortieService.validationBonSortie(1L);
-        });
+        assertThrows(StockInsuffisantException.class,
+                () -> bonSortieService.validationBonSortie(1L)
+        );
+        
+        verifyNoInteractions(mouvementStockRepository);
+        verifyNoInteractions(lotStockRepository);
 
-        verify(mouvementStockRepository, never()).save(any(MouvementStock.class));
-        verify(lotStockRepository, never()).save(any(LotStock.class));
     }
 
     @Test
@@ -218,8 +219,7 @@ class BonSortieServiceImplTest {
 
         when(bonSortieRepository.findById(1L)).thenReturn(Optional.of(bonSortie));
         when(gestionStockService.verifyStockPourBonSortie(any())).thenReturn(new ArrayList<>());
-        when(lotStockRepository.findByProduitIdOrderByDateEntreeAsc(1L))
-                .thenReturn(Arrays.asList(lotStock1, lotStock3, lotStock2));
+        when(lotStockRepository.findByProduitIdOrderByDateEntreeAsc(1L)).thenReturn(Arrays.asList(lotStock1, lotStock3, lotStock2));
         when(bonSortieRepository.save(any(BonSortie.class))).thenReturn(bonSortie);
         when(bonSortieMapper.toResponseDTO(any(BonSortie.class))).thenReturn(BonSortieResponseDTO.builder().build());
 
@@ -248,8 +248,7 @@ class BonSortieServiceImplTest {
 
         when(bonSortieRepository.findById(1L)).thenReturn(Optional.of(bonSortie));
         when(gestionStockService.verifyStockPourBonSortie(any())).thenReturn(new ArrayList<>());
-        when(lotStockRepository.findByProduitIdOrderByDateEntreeAsc(1L))
-                .thenReturn(Arrays.asList(lotStock1, lotStock3, lotStock2));
+        when(lotStockRepository.findByProduitIdOrderByDateEntreeAsc(1L)).thenReturn(Arrays.asList(lotStock1, lotStock3, lotStock2));
         when(bonSortieRepository.save(any(BonSortie.class))).thenAnswer(invocation -> {
             BonSortie bs = invocation.getArgument(0);
             assertEquals(StatutBonSortie.VALIDE, bs.getStatut());

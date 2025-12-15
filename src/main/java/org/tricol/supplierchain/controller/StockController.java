@@ -2,18 +2,25 @@ package org.tricol.supplierchain.controller;
 
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.tricol.supplierchain.dto.request.MouvementStockSearchCriteria;
 import org.tricol.supplierchain.dto.response.AlerteStockResponseDTO;
 import org.tricol.supplierchain.dto.response.MouvementStockResponseDTO;
 import org.tricol.supplierchain.dto.response.StockGlobalResponseDTO;
 import org.tricol.supplierchain.dto.response.StockProduitResponseDTO;
+import org.tricol.supplierchain.enums.TypeMouvement;
+import org.tricol.supplierchain.service.MouvementStockSearchService;
 import org.tricol.supplierchain.service.inter.GestionStockService;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -22,6 +29,7 @@ import java.util.List;
 public class StockController {
     private final GestionStockService stockService;
     private final GestionStockService gestionStockService;
+    private final MouvementStockSearchService mouvementStockSearchService;
 
 
     @GetMapping
@@ -49,6 +57,30 @@ public class StockController {
     @GetMapping("/valorisation")
     public ResponseEntity<BigDecimal> getValorisationTotale(){
         return ResponseEntity.ok(stockService.getValorisationTotale());
+    }
+
+    @GetMapping("/mouvements/search")
+    public ResponseEntity<Page<MouvementStockResponseDTO>> searchMouvements(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateDebut,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFin,
+            @RequestParam(required = false) Long produitId,
+            @RequestParam(required = false) String reference,
+            @RequestParam(required = false) TypeMouvement type,
+            @RequestParam(required = false) String numeroLot,
+            @PageableDefault(size = 20, sort = "dateMouvement", direction = Sort.Direction.ASC) Pageable pageable
+    ) {
+        MouvementStockSearchCriteria criteria = MouvementStockSearchCriteria
+                .builder()
+                .dateDebut(dateDebut)
+                .dateFin(dateFin)
+                .produitId(produitId)
+                .reference(reference)
+                .type(type)
+                .numeroLot(numeroLot)
+                .build();
+        
+        Page<MouvementStockResponseDTO> result = mouvementStockSearchService.searchMouvements(criteria, pageable);
+        return ResponseEntity.ok(result);
     }
 
 }

@@ -113,7 +113,7 @@ class GestionStockImplTest {
     }
 
     @Test
-    @DisplayName("Calcul de valorisation du stock avec plusieurs lots à prix différents")
+    @DisplayName("Calcul de valorisation du stock avec plusieurs lots a prix differents")
     void testCalculerValorisationTotale_AvecPlusieursLotsAPrixDifferents() {
         List<LotStock> lots = Arrays.asList(lotStock1, lotStock2, lotStock3);
         when(lotStockRepository.findByStatut(StatutLot.ACTIF)).thenReturn(lots);

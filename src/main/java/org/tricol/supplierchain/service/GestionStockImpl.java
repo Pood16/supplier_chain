@@ -9,6 +9,7 @@ import org.tricol.supplierchain.dto.request.LigneCommandeCreateDTO;
 import org.tricol.supplierchain.dto.response.*;
 import org.tricol.supplierchain.entity.*;
 import org.tricol.supplierchain.enums.StatutLot;
+import org.tricol.supplierchain.enums.TypeMouvement;
 import org.tricol.supplierchain.exception.ResourceNotFoundException;
 import org.tricol.supplierchain.mapper.LotStockMapper;
 import org.tricol.supplierchain.mapper.MouvementStockMapper;
@@ -24,6 +25,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Data
@@ -199,9 +201,9 @@ public class GestionStockImpl implements GestionStockService {
                 .stream()
                 .map(lot -> lot.getQuantiteRestante().multiply(lot.getPrixUnitaireAchat()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        produitResponse.setValorisationTotale(valorisation);
-        produitResponse.setAlerteSeuil(isEnAlerte(produit));
-        produitResponse.setStockTotal(getQuantiteDisponible(produit.getId()));
+                produitResponse.setValorisationTotale(valorisation);
+                produitResponse.setAlerteSeuil(isEnAlerte(produit));
+                produitResponse.setStockTotal(getQuantiteDisponible(produit.getId()));
 
 
         return produitResponse;

@@ -2,7 +2,10 @@
 package org.tricol.supplierchain.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -10,6 +13,9 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Table(name = "produits")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Produit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

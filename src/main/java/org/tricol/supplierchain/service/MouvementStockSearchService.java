@@ -9,19 +9,16 @@ import org.springframework.transaction.annotation.Transactional;
 import org.tricol.supplierchain.dto.request.MouvementStockSearchCriteria;
 import org.tricol.supplierchain.dto.response.MouvementStockResponseDTO;
 import org.tricol.supplierchain.entity.MouvementStock;
-import org.tricol.supplierchain.enums.TypeMouvement;
 import org.tricol.supplierchain.mapper.MouvementStockMapper;
 import org.tricol.supplierchain.repository.MouvementStockRepository;
 import org.tricol.supplierchain.specification.MouvementStockSpecifications;
-
-import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class MouvementStockSearchService {
     
-    private final MouvementStockRepository repository;
+    private final MouvementStockRepository mouvementStockRepository;
     private final MouvementStockMapper mapper;
     
     public Page<MouvementStockResponseDTO> searchMouvements(
@@ -29,7 +26,7 @@ public class MouvementStockSearchService {
             Pageable pageable) {
         
         Specification<MouvementStock> spec = MouvementStockSpecifications.withCriteria(criteria);
-        Page<MouvementStock> mouvements = repository.findAll(spec, pageable);
+        Page<MouvementStock> mouvements = mouvementStockRepository.findAll(spec, pageable);
         return mouvements.map(mapper::toResponseDTO);
     }
     

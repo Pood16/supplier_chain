@@ -15,5 +15,7 @@ public interface Produitservice {
     ProduitResponseDTO getProduitById(Long id);
     void deleteProduit(Long id);
     List<ProduitResponseDTO> getAllProduits();
+
+
     
 }

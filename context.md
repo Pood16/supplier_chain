@@ -1,161 +1,116 @@
-# Sprint 3 - Brief 2 : Gestion d'approvisionnement
+# Gestion de Stock Tricol - Documentation Technique
 
-### Travail en binôme
+## Contexte du Projet
 
+Tricol, entreprise spécialisée dans la fabrication de vêtements professionnels, a développé un système de gestion de stock basé sur la méthode **FIFO** (First-In, First-Out). Ce système gère :
 
+- Les réceptions de commandes fournisseurs
+- Les lots de stock
+- Les sorties de stock via des bons de sortie
 
-L’entreprise **Tricol**, spécialisée dans la conception et la fabrication de vêtements professionnels, poursuit la digitalisation de ses processus internes.  
-Après la mise en place du module de gestion des fournisseurs, la direction souhaite développer un module complémentaire dédié à la gestion des commandes fournisseurs et du stock avec la valorisation **FIFO**.
-
-Ce module constitue une étape stratégique vers un système complet de gestion des approvisionnements et de la production, permettant un suivi rigoureux des matières premières et des équipements.
-
----
-
-## Exigences fonctionnelles
-
-### 1. Gestion des Fournisseurs
-
-- CRUD complet (Créer, Consulter, Modifier, Supprimer)
-- Recherche et filtrage des fournisseurs
-- Informations à gérer : raison sociale, adresse complète, personne de contact, email, téléphone, ville, ICE
+### Problématique Actuelle
+Le module de gestion de stock fonctionne mais **manque de tests unitaires** pour garantir la fiabilité de la logique métier critique. L'équipe de direction souhaite également disposer de **fonctionnalités d'audit avancées** pour tracer et analyser les mouvements de stock.
 
 ---
 
-### 2. Gestion des Produits
+## Partie 1 : Tests Unitaires de la Gestion de Stock
 
-- CRUD complet des produits
-- Consultation du stock disponible par produit
-- Système d’alertes sur seuils minimums
-- Informations produits à gérer : référence produit, nom, description, prix unitaire, catégorie, stock actuel, point de commande, unité de mesure
+### Tâche 1.1 : Tests du service de Stock et FIFO
 
----
+Développer des tests unitaires (JUnit + Mockito) pour la couche Service.
 
-### 3. Gestion des Commandes Fournisseurs
+#### A. Mécanisme de Sortie de Stock FIFO
 
-- Créer une nouvelle commande fournisseur
-- Modifier ou annuler une commande existante
-- Consulter la liste de toutes les commandes
-- Consulter le détail d’une commande spécifique
-- Filtrage par fournisseur, statut, période
-- Associer une commande à un fournisseur et à une liste de produits
-- Calcul automatique du montant total de la commande
-- Statut de la commande : **EN_ATTENTE, VALIDÉE, LIVRÉE, ANNULÉE**
-- Réception de commande
+**Scénarios de test :**
 
----
+- **Scénario 1** : Sortie simple consommant partiellement un seul lot
+- **Scénario 2** : Sortie nécessitant la consommation de plusieurs lots successifs
+- **Scénario 3** : Sortie avec stock insuffisant (gestion d'erreur)
+- **Scénario 4** : Sortie épuisant exactement le stock disponible
 
-### 4. Gestion de Stock (FIFO)
+#### B. Création Automatique de Lot
 
-- **Mouvements d’entrée** : enregistrement automatique lors de la réception des commandes fournisseurs
-- **Mouvements de sortie** : consommation du stock selon FIFO (les plus anciens lots sont utilisés en premier)
-- **Traçabilité des lots** : chaque entrée de stock est identifiée par :
-    - Numéro de lot unique
-    - Date d’entrée
-    - Quantité
-    - Prix d’achat unitaire
-    - Commande fournisseur d’origine
+**Points de vérification :**
 
-- **Consultation du stock** :
-    - Stock disponible par produit
-    - Valorisation du stock (FIFO)
-    - Historique des mouvements
+- Création automatique d'un lot de stock traçable lors de la validation d'une réception de commande fournisseur
+- Contrôle de la génération :
+    - Numéro de lot
+    - Date d'entrée
+    - Prix d'achat unitaire
+- Vérification du lien entre le lot créé et la réception fournisseur
 
-- **Alertes** : notification lorsque le stock d’un produit passe sous le seuil minimum
+#### C. Calcul de Valorisation du Stock
 
----
+**Tests à implémenter :**
 
-### 5. Gestion des Bons de Sortie
+- Calcul de la valeur totale du stock (quantités restantes × prix d'achat unitaires)
+- Vérification selon la méthode FIFO (valorisation basée sur les lots les plus anciens)
+- Tests avec plusieurs lots à prix différents
 
-Les **Bons de Sortie** permettent de gérer les sorties de stock vers les ateliers de production de manière traçable.  
-Un bon de sortie est un document qui formalise le prélèvement de produits (matières premières, fournitures) du stock central pour les acheminer vers un atelier spécifique.
+### Tâche 1.2 : Tests des Transitions de Statut
 
-**Fonctionnalités :**
-- Création de bon de sortie atelier
-- Ajout multi-produits avec quantités
-- Validation déclenchant automatiquement les sorties
-- Annulation possible
-- Consultation
+**Workflows de validation à tester :**
 
-**Création de bon de sortie pour atelier avec :**
-- Numéro unique de bon
-- Date de sortie
-- Atelier destinataire
-- Liste des produits avec quantités
-- Motif de sortie (PRODUCTION, MAINTENANCE, AUTRE)
-- Statut (BROUILLON, VALIDÉ, ANNULÉ)
+Vérifier que la validation d'un bon de sortie (BROUILLON → VALIDÉ) déclenche automatiquement :
 
-La validation du bon déclenche automatiquement les mouvements de stock FIFO.  
-**Traçabilité** : lien entre bon de sortie et mouvements de stock.
+- Création des mouvements de stock correspondants
+- Mise à jour des quantités restantes dans les lots
+- Enregistrement des informations de validation (utilisateur, date)
 
 ---
 
-## Règles métier spécifiques (Méthode FIFO)
+## Partie 2 : Recherche Avancée sur les Mouvements de Stock
 
-1. **Réception de commande** : lors de la validation de réception d’une commande fournisseur, création automatique des lots de stock avec numéro unique et date d’entrée.
-2. **Sortie de stock** : l’algorithme FIFO doit :
-    - Identifier les lots les plus anciens en premier
-    - Consommer les quantités dans l’ordre chronologique
-    - Gérer le cas où une sortie nécessite plusieurs lots
-    - Mettre à jour les quantités restantes de chaque lot
-3. **Valorisation** : le calcul de la valeur du stock doit utiliser les prix d’achat des lots selon leur ordre d’entrée.
-4. **Traçabilité** : chaque mouvement doit être enregistré avec référence aux lots concernés.
+### Tâche 2.1 : Implémentation avec Spring Data JPA Specifications
 
----
+**Approche recommandée :** Utiliser Spring Data JPA Specifications ou la Criteria API de JPA pour construire dynamiquement des requêtes complexes basées sur plusieurs critères de recherche.
 
+### Tâche 2.2 : Critères de Recherche à Implémenter
 
+L'endpoint `GET /api/v1/stock/mouvements` doit accepter les paramètres de requête :
 
-## API REST attendue
+| Paramètre | Description |
+|-----------|-------------|
+| `dateDebut`, `dateFin` | Filtrage sur la date du mouvement (intervalle) |
+| `produitId`, `reference` | Filtrage par produit |
+| `type` | Type de mouvement (ENTREE/SORTIE) |
+| `numeroLot` | Recherche par numéro de lot |
 
-### Fournisseurs
+### Tâche 2.3 : Intégration de la Pagination
 
-- `GET /api/v1/fournisseurs`
-- `GET /api/v1/fournisseurs/{id}`
-- `POST /api/v1/fournisseurs`
-- `PUT /api/v1/fournisseurs/{id}`
-- `DELETE /api/v1/fournisseurs/{id}`
+**Paramètres obligatoires :**
+- `page` : numéro de page (débute à 0)
+- `size` : nombre d'éléments par page
 
----
+### Exemples d'Appels API
 
-### Produits
+#### Recherche par produit et type avec pagination
+```http
+GET /api/v1/stock/mouvements?produitId=123&type=SORTIE&page=0&size=10
+```
 
-- `GET /api/v1/produits`
-- `GET /api/v1/produits/{id}`
-- `POST /api/v1/produits`
-- `PUT /api/v1/produits/{id}`
-- `DELETE /api/v1/produits/{id}`
-- `GET /api/v1/produits/{id}/stock` → consulter le stock d’un produit
+#### Recherche par période
+```http
+GET /api/v1/stock/mouvements?dateDebut=2025-01-01&dateFin=2025-03-31
+```
 
----
+#### Recherche par numéro de lot
+```http
+GET /api/v1/stock/mouvements?numeroLot=LOT-2025-001
+```
 
-### Commandes Fournisseurs
-
-- `GET /api/v1/commandes` → liste des commandes
-- `GET /api/v1/commandes/{id}` → détails d’une commande
-- `POST /api/v1/commandes` → créer une nouvelle commande
-- `PUT /api/v1/commandes/{id}` → modifier une commande
-- `DELETE /api/v1/commandes/{id}` → supprimer une commande
-- `GET /api/v1/commandes/fournisseur/{id}` → commandes d’un fournisseur
-- `PUT /api/v1/commandes/{id}/reception` → réceptionner une commande (génère les entrées de stock)
+#### Recherche combinée multi-critères
+```http
+GET /api/v1/stock/mouvements?reference=PROD001&type=ENTREE&dateDebut=2025-01-01&page=0&size=20
+```
 
 ---
 
-### Gestion de Stock
+## Objectifs d'Apprentissage
 
-- `GET /api/v1/stock` → état global du stock
-- `GET /api/v1/stock/produit/{id}` → détail du stock par produit avec lots FIFO
-- `GET /api/v1/stock/mouvements` → historique des mouvements
-- `GET /api/v1/stock/mouvements/produit/{id}` → mouvements d’un produit spécifique
-- `GET /api/v1/stock/alertes` → produits sous le seuil minimum
-- `GET /api/v1/stock/valorisation` → valorisation totale du stock (méthode FIFO)
+1. **Développer une suite de tests unitaires** couvrant la logique métier critique :
+    - Algorithme FIFO
+    - Création de lots
+    - Valorisation du stock
 
----
-
-### Bons de Sortie
-
-- `GET /api/v1/bons-sortie` → liste de tous les bons
-- `GET /api/v1/bons-sortie/{id}` → détails d’un bon
-- `POST /api/v1/bons-sortie` → créer un bon (statut BROUILLON)
-- `PUT /api/v1/bons-sortie/{id}` → modifier un bon brouillon
-- `PUT /api/v1/bons-sortie/{id}/valider` → valider un bon (sorties FIFO)
-- `PUT /api/v1/bons-sortie/{id}/annuler` → annuler un bon brouillon
-- `GET /api/v1/bons-sortie/atelier/{atelier}` → bons par atelier
+2. **Implémenter une API de recherche avancée** multi-critères pour faciliter l'audit des mouvements de stock

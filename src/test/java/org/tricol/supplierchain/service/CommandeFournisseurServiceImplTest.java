@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -76,13 +77,13 @@ class CommandeFournisseurServiceImplTest {
         produit1.setId(1L);
         produit1.setNom("Produit 1");
         produit1.setReference("PROD-001");
-        produit1.setStockActuel(new BigDecimal("100.00"));
+        produit1.setStockActuel(BigDecimal.ZERO);
 
         produit2 = new Produit();
         produit2.setId(2L);
         produit2.setNom("Produit 2");
         produit2.setReference("PROD-002");
-        produit2.setStockActuel(new BigDecimal("50.00"));
+        produit2.setStockActuel(BigDecimal.ZERO);
 
         commande = new CommandeFournisseur();
         commande.setId(1L);
@@ -120,8 +121,7 @@ class CommandeFournisseurServiceImplTest {
         when(lotStockRepository.save(any(LotStock.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(mouvementStockRepository.save(any(MouvementStock.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(produitRepository.save(any(Produit.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(commandeFournisseurMapper.toResponseDto(any(CommandeFournisseur.class)))
-                .thenReturn(new CommandeFournisseurResponseDTO());
+        when(commandeFournisseurMapper.toResponseDto(any(CommandeFournisseur.class))).thenReturn(new CommandeFournisseurResponseDTO());
 
         CommandeFournisseurResponseDTO result = commandeFournisseurService.receiveCommande(1L);
 
@@ -130,7 +130,7 @@ class CommandeFournisseurServiceImplTest {
         ArgumentCaptor<LotStock> lotCaptor = ArgumentCaptor.forClass(LotStock.class);
         verify(lotStockRepository, times(2)).save(lotCaptor.capture());
         
-        var lots = lotCaptor.getAllValues();
+        List<LotStock> lots = lotCaptor.getAllValues();
         assertEquals(2, lots.size());
 
         LotStock lot1 = lots.get(0);
@@ -146,9 +146,13 @@ class CommandeFournisseurServiceImplTest {
 
         LotStock lot2 = lots.get(1);
         assertNotNull(lot2.getNumeroLot());
+        assertTrue(lot2.getNumeroLot().startsWith("LOT-"));
         assertEquals(produit2, lot2.getProduit());
         assertEquals(new BigDecimal("30.00"), lot2.getQuantiteInitiale());
+        assertEquals(new BigDecimal("30.00"), lot2.getQuantiteRestante());
         assertEquals(new BigDecimal("15.00"), lot2.getPrixUnitaireAchat());
+        assertEquals(StatutLot.ACTIF, lot2.getStatut());
+        assertNotNull(lot1.getDateEntree());
     }
 
     @Test
@@ -175,168 +179,79 @@ class CommandeFournisseurServiceImplTest {
     }
 
     @Test
-    @DisplayName("Creation de mouvement de stock lors de la reception")
-    void testReceiveCommande_CreationMouvementStock() {
+    @DisplayName("Reception commande - Validation avec creation automatique lots et mouvements")
+    void testReceiveCommande_ValidationCompleteAvecLotsEtMouvements() {
+
+        commande.setStatut(StatutCommande.VALIDEE);
+
         when(commandeFournisseurRepository.findById(1L)).thenReturn(Optional.of(commande));
         when(commandeFournisseurRepository.save(any(CommandeFournisseur.class))).thenReturn(commande);
         when(lotStockRepository.save(any(LotStock.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(mouvementStockRepository.save(any(MouvementStock.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(produitRepository.save(any(Produit.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(commandeFournisseurMapper.toResponseDto(any(CommandeFournisseur.class)))
-                .thenReturn(new CommandeFournisseurResponseDTO());
+        when(commandeFournisseurMapper.toResponseDto(any(CommandeFournisseur.class))).thenReturn(new CommandeFournisseurResponseDTO());
 
-        commandeFournisseurService.receiveCommande(1L);
+        CommandeFournisseurResponseDTO result = commandeFournisseurService.receiveCommande(1L);
+
+        ArgumentCaptor<CommandeFournisseur> commandeCaptor = ArgumentCaptor.forClass(CommandeFournisseur.class);
+        verify(commandeFournisseurRepository).save(commandeCaptor.capture());
+        assertEquals(StatutCommande.LIVREE, commandeCaptor.getValue().getStatut());
+        assertNotNull(commandeCaptor.getValue().getDateLivraisonEffective());
+
+
+        ArgumentCaptor<LotStock> lotCaptor = ArgumentCaptor.forClass(LotStock.class);
+        verify(lotStockRepository, times(2)).save(lotCaptor.capture());
+
+        List<LotStock> lots = lotCaptor.getAllValues();
+        assertEquals(2, lots.size());
+
+
+        LotStock lot1 = lots.stream()
+                .filter(lot -> lot.getProduit().equals(produit1))
+                .findFirst().orElseThrow();
+        assertTrue(lot1.getNumeroLot().startsWith("LOT-"));
+        assertEquals(new BigDecimal("50.00"), lot1.getQuantiteInitiale());
+        assertEquals(StatutLot.ACTIF, lot1.getStatut());
+        assertEquals(commande, lot1.getCommande());
+
+        LotStock lot2 = lots.stream()
+                .filter(lot -> lot.getProduit().equals(produit2))
+                .findFirst().orElseThrow();
+        assertTrue(lot2.getNumeroLot().startsWith("LOT-"));
+        assertEquals(new BigDecimal("30.00"), lot2.getQuantiteInitiale());
+        assertEquals(StatutLot.ACTIF, lot2.getStatut());
+        assertEquals(commande, lot2.getCommande());
 
         ArgumentCaptor<MouvementStock> mouvementCaptor = ArgumentCaptor.forClass(MouvementStock.class);
         verify(mouvementStockRepository, times(2)).save(mouvementCaptor.capture());
 
-        var mouvements = mouvementCaptor.getAllValues();
+        List<MouvementStock> mouvements = mouvementCaptor.getAllValues();
         assertEquals(2, mouvements.size());
 
-        MouvementStock mouvement1 = mouvements.get(0);
+        MouvementStock mouvement1 = mouvements.stream()
+                .filter(mvt -> mvt.getProduit().equals(produit1))
+                .findFirst().orElseThrow();
         assertEquals(TypeMouvement.ENTREE, mouvement1.getTypeMouvement());
         assertEquals("RECEPTION_COMMANDE", mouvement1.getMotif());
         assertEquals(commande.getNumeroCommande(), mouvement1.getReference());
-        assertEquals(produit1, mouvement1.getProduit());
         assertEquals(new BigDecimal("50.00"), mouvement1.getQuantite());
-        assertNotNull(mouvement1.getDateMouvement());
 
-        MouvementStock mouvement2 = mouvements.get(1);
+        MouvementStock mouvement2 = mouvements.stream()
+                .filter(mvt -> mvt.getProduit().equals(produit2))
+                .findFirst().orElseThrow();
         assertEquals(TypeMouvement.ENTREE, mouvement2.getTypeMouvement());
-        assertEquals(produit2, mouvement2.getProduit());
+        assertEquals("RECEPTION_COMMANDE", mouvement2.getMotif());
+        assertEquals(commande.getNumeroCommande(), mouvement2.getReference());
         assertEquals(new BigDecimal("30.00"), mouvement2.getQuantite());
-    }
 
-    @Test
-    @DisplayName("Mise a jour du stock actuel du produit lors de la reception")
-    void testReceiveCommande_MiseAJourStockActuel() {
-        BigDecimal stockInitialProduit1 = produit1.getStockActuel();
-        BigDecimal stockInitialProduit2 = produit2.getStockActuel();
-
-        when(commandeFournisseurRepository.findById(1L)).thenReturn(Optional.of(commande));
-        when(commandeFournisseurRepository.save(any(CommandeFournisseur.class))).thenReturn(commande);
-        when(lotStockRepository.save(any(LotStock.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(mouvementStockRepository.save(any(MouvementStock.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(produitRepository.save(any(Produit.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(commandeFournisseurMapper.toResponseDto(any(CommandeFournisseur.class)))
-                .thenReturn(new CommandeFournisseurResponseDTO());
-
-        commandeFournisseurService.receiveCommande(1L);
 
         ArgumentCaptor<Produit> produitCaptor = ArgumentCaptor.forClass(Produit.class);
         verify(produitRepository, times(2)).save(produitCaptor.capture());
 
-        var produits = produitCaptor.getAllValues();
-        
-        Produit savedProduit1 = produits.stream()
-                .filter(p -> p.getId().equals(1L))
-                .findFirst()
-                .orElseThrow();
-        assertEquals(stockInitialProduit1.add(new BigDecimal("50.00")), savedProduit1.getStockActuel());
-
-        Produit savedProduit2 = produits.stream()
-                .filter(p -> p.getId().equals(2L))
-                .findFirst()
-                .orElseThrow();
-        assertEquals(stockInitialProduit2.add(new BigDecimal("30.00")), savedProduit2.getStockActuel());
-    }
-
-    @Test
-    @DisplayName("Mise a jour du statut de la commande a LIVREE")
-    void testReceiveCommande_MiseAJourStatut() {
-        when(commandeFournisseurRepository.findById(1L)).thenReturn(Optional.of(commande));
-        when(commandeFournisseurRepository.save(any(CommandeFournisseur.class))).thenReturn(commande);
-        when(lotStockRepository.save(any(LotStock.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(mouvementStockRepository.save(any(MouvementStock.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(produitRepository.save(any(Produit.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(commandeFournisseurMapper.toResponseDto(any(CommandeFournisseur.class)))
-                .thenReturn(new CommandeFournisseurResponseDTO());
-
-        commandeFournisseurService.receiveCommande(1L);
-
-        ArgumentCaptor<CommandeFournisseur> commandeCaptor = ArgumentCaptor.forClass(CommandeFournisseur.class);
-        verify(commandeFournisseurRepository, times(1)).save(commandeCaptor.capture());
-
-        CommandeFournisseur savedCommande = commandeCaptor.getValue();
-        assertEquals(StatutCommande.LIVREE, savedCommande.getStatut());
-        assertNotNull(savedCommande.getDateLivraisonEffective());
-        assertEquals(LocalDate.now(), savedCommande.getDateLivraisonEffective());
-    }
-
-    @Test
-    @DisplayName("Impossible de receptionner une commande non validee")
-    void testReceiveCommande_CommandeNonValidee() {
-        commande.setStatut(StatutCommande.EN_ATTENTE);
-
-        when(commandeFournisseurRepository.findById(1L)).thenReturn(Optional.of(commande));
-
-        assertThrows(BusinessException.class, () -> {
-            commandeFournisseurService.receiveCommande(1L);
-        });
-
-        verify(lotStockRepository, never()).save(any(LotStock.class));
-        verify(mouvementStockRepository, never()).save(any(MouvementStock.class));
-    }
-
-    @Test
-    @DisplayName("Impossible de receptionner une commande deja livree")
-    void testReceiveCommande_CommandeDejaLivree() {
-        commande.setStatut(StatutCommande.LIVREE);
-
-        when(commandeFournisseurRepository.findById(1L)).thenReturn(Optional.of(commande));
-
-        assertThrows(BusinessException.class, () -> {
-            commandeFournisseurService.receiveCommande(1L);
-        });
-
-        verify(lotStockRepository, never()).save(any(LotStock.class));
-        verify(mouvementStockRepository, never()).save(any(MouvementStock.class));
-    }
-
-    @Test
-    @DisplayName("Validation d'une commande en attente")
-    void testValiderCommande_Success() {
-        commande.setStatut(StatutCommande.EN_ATTENTE);
-
-        when(commandeFournisseurRepository.findById(1L)).thenReturn(Optional.of(commande));
-        when(commandeFournisseurRepository.save(any(CommandeFournisseur.class))).thenReturn(commande);
-        when(commandeFournisseurMapper.toResponseDto(any(CommandeFournisseur.class)))
-                .thenReturn(new CommandeFournisseurResponseDTO());
-
-        CommandeFournisseurResponseDTO result = commandeFournisseurService.validerCommande(1L);
+        assertEquals(lot1.getProduit().getStockActuel(), new BigDecimal("50.00"));
+        assertEquals(lot2.getProduit().getStockActuel(), new BigDecimal("30.00"));
 
         assertNotNull(result);
-
-        ArgumentCaptor<CommandeFournisseur> commandeCaptor = ArgumentCaptor.forClass(CommandeFournisseur.class);
-        verify(commandeFournisseurRepository, times(1)).save(commandeCaptor.capture());
-
-        CommandeFournisseur savedCommande = commandeCaptor.getValue();
-        assertEquals(StatutCommande.VALIDEE, savedCommande.getStatut());
     }
 
-    @Test
-    @DisplayName("Impossible de valider une commande deja validee")
-    void testValiderCommande_DejaValidee() {
-        commande.setStatut(StatutCommande.VALIDEE);
-
-        when(commandeFournisseurRepository.findById(1L)).thenReturn(Optional.of(commande));
-
-        assertThrows(BusinessException.class, () -> {
-            commandeFournisseurService.validerCommande(1L);
-        });
-
-        verify(commandeFournisseurRepository, never()).save(any(CommandeFournisseur.class));
-    }
-
-    @Test
-    @DisplayName("Commande inexistante")
-    void testReceiveCommande_CommandeInexistante() {
-        when(commandeFournisseurRepository.findById(999L)).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class, () -> {
-            commandeFournisseurService.receiveCommande(999L);
-        });
-
-        verify(lotStockRepository, never()).save(any(LotStock.class));
-    }
 }

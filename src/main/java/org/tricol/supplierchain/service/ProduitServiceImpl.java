@@ -1,6 +1,7 @@
 package org.tricol.supplierchain.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.tricol.supplierchain.dto.request.ProduitRequestDTO;
 import org.tricol.supplierchain.dto.request.ProduitUpdatDTO;
@@ -14,6 +15,7 @@ import org.tricol.supplierchain.repository.LigneCommandeRepository;
 import org.tricol.supplierchain.repository.LigneBonSortieRepository;
 import org.tricol.supplierchain.repository.ProduitRepository;
 import org.tricol.supplierchain.service.inter.Produitservice;
+import org.tricol.supplierchain.specification.ProduitSpecification;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,9 +78,11 @@ public class ProduitServiceImpl implements Produitservice {
 
     @Override
     public List<ProduitResponseDTO> getAllProduits() {
+
         List<ProduitResponseDTO> produits = produitRepository.findAll().stream()
                 .map(produitMapper::toResponseDTO)
                 .toList();
         return produits;
     }
+
 }
