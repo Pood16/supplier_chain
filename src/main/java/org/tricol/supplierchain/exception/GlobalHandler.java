@@ -1,19 +1,16 @@
-package org.tricol.supplierchain.controller;
+package org.tricol.supplierchain.exception;
 
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.tricol.supplierchain.exception.DuplicateResourceException;
-import org.tricol.supplierchain.exception.OperationNotAllowedException;
-import org.tricol.supplierchain.exception.ResourceNotFoundException;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 @RestControllerAdvice
 public class GlobalHandler {
@@ -26,8 +23,6 @@ public class GlobalHandler {
         });
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
-
-
 
     @ExceptionHandler(DuplicateResourceException.class)
     public ResponseEntity<HashMap<String, String>> handleDuplicate(DuplicateResourceException ex) {
@@ -51,6 +46,14 @@ public class GlobalHandler {
         errors.put("error", ex.getMessage());
         errors.put("status", "404");
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errors);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<HashMap<String, String>> handleBadCredentials(BadCredentialsException ex) {
+        HashMap<String, String> errors = new HashMap<>();
+        errors.put("error", ex.getMessage());
+        errors.put("status", "401");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errors);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
