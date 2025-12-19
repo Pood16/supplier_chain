@@ -56,6 +56,14 @@ public class GlobalHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errors);
     }
 
+    @ExceptionHandler(InsufficientPermissionsException.class)
+    public ResponseEntity<HashMap<String, String>> handleCustomAccessDeniedException(InsufficientPermissionsException ex) {
+        HashMap<String, String> errors = new HashMap<>();
+        errors.put("error", ex.getMessage());
+        errors.put("status", "403");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errors);
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Map<String, String>> handleInvalidDate(HttpMessageNotReadableException ex) {
         if (ex.getMessage().contains("DateTimeParseException")) {
