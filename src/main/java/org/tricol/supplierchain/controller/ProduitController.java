@@ -9,6 +9,7 @@ import org.tricol.supplierchain.dto.request.ProduitRequestDTO;
 import org.tricol.supplierchain.dto.request.ProduitUpdatDTO;
 import org.tricol.supplierchain.dto.response.ProduitResponseDTO;
 import org.tricol.supplierchain.dto.response.StockProduitResponseDTO;
+import org.tricol.supplierchain.security.RequirePermission;
 import org.tricol.supplierchain.service.inter.GestionStockService;
 import org.tricol.supplierchain.service.inter.Produitservice;
 
@@ -23,6 +24,7 @@ public class ProduitController {
     private final GestionStockService stockService;
 
     @GetMapping
+    @RequirePermission("PRODUIT_READ")
     public ResponseEntity<List<ProduitResponseDTO>> getAllProduits() {
         List<ProduitResponseDTO> produits = produitservice.getAllProduits();
         return ResponseEntity.ok(produits);
@@ -30,24 +32,28 @@ public class ProduitController {
 
 
     @PostMapping
+    @RequirePermission("PRODUIT_CREATE")
     public ResponseEntity<ProduitResponseDTO> createProduit(@Valid @RequestBody ProduitRequestDTO produitRequestDTO) {
         ProduitResponseDTO produit = produitservice.createProduit(produitRequestDTO);
         return ResponseEntity.ok(produit);
     }
 
     @GetMapping("/{id}")
+    @RequirePermission("PRODUIT_READ")
     public ResponseEntity<ProduitResponseDTO> getProduitById(@PathVariable Long id){
         ProduitResponseDTO produit = produitservice.getProduitById(id);
         return ResponseEntity.ok(produit);
     }
 
     @DeleteMapping("/{id}")
+    @RequirePermission("PRODUIT_CREATE")
     public ResponseEntity<Void> deleteProduit(@PathVariable Long id){
         produitservice.deleteProduit(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}")
+    @RequirePermission("PRODUIT_CREATE")
     public ResponseEntity<ProduitResponseDTO> updateProduit(@PathVariable Long id, @Valid @RequestBody ProduitUpdatDTO produitUpdatDTO) {
         ProduitResponseDTO updatedProduit = produitservice.modifierProduit(id, produitUpdatDTO);
         return ResponseEntity.ok(updatedProduit);
@@ -56,6 +62,7 @@ public class ProduitController {
 
 
     @GetMapping("/{id}/stock")
+    @RequirePermission("STOCK_READ")
     public ResponseEntity<StockProduitResponseDTO> getStockByProduit(@PathVariable Long id) {
         return ResponseEntity.ok(stockService.getStockByProduit(id));
     }

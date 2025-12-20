@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.tricol.supplierchain.dto.request.CommandeFournisseurCreateDTO;
 import org.tricol.supplierchain.dto.request.CommandeFournisseurUpdateDTO;
 import org.tricol.supplierchain.dto.response.CommandeFournisseurResponseDTO;
+import org.tricol.supplierchain.security.RequirePermission;
 import org.tricol.supplierchain.service.inter.CommandeFournisseurService;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public class CommandeFournisseurController {
     private final CommandeFournisseurService commandeFournisseurService;
 
     @GetMapping
+    @RequirePermission("COMMANDE_READ")
     public ResponseEntity<List<CommandeFournisseurResponseDTO>> getAllCommandes(){
         List<CommandeFournisseurResponseDTO> commandes = commandeFournisseurService.getAllCommandes();
         if (commandes == null || commandes.isEmpty()) return ResponseEntity.noContent().build();
@@ -28,18 +30,21 @@ public class CommandeFournisseurController {
     }
 
     @PostMapping
+    @RequirePermission("COMMANDE_CREATE")
     public ResponseEntity<CommandeFournisseurResponseDTO> createCommande(@Valid @RequestBody CommandeFournisseurCreateDTO createDTO){
         CommandeFournisseurResponseDTO response = commandeFournisseurService.createCommande(createDTO);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{commandeId}")
+    @RequirePermission("COMMANDE_READ")
     public ResponseEntity<CommandeFournisseurResponseDTO> getCommande(@PathVariable(name = "commandeId") @Positive Long id){
         CommandeFournisseurResponseDTO commande = commandeFournisseurService.getCommandeById(id);
         return ResponseEntity.ok(commande);
     }
 
     @PutMapping("/{commandeId}")
+    @RequirePermission("COMMANDE_CREATE")
     public ResponseEntity<CommandeFournisseurResponseDTO> updateCommande(
             @PathVariable("commandeId") Long id,
             @Valid @RequestBody CommandeFournisseurUpdateDTO requestDTO
@@ -49,24 +54,28 @@ public class CommandeFournisseurController {
     }
 
     @DeleteMapping("/{commandeId}")
+    @RequirePermission("COMMANDE_CANCEL")
     public ResponseEntity<Void> deleteCommande(@PathVariable("commandeId") Long id){
         commandeFournisseurService.deleteCommande(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/fournisseur/{fournisseurId}")
+    @RequirePermission("COMMANDE_READ")
     public ResponseEntity<List<CommandeFournisseurResponseDTO>> getCommandeBySupplierId(@PathVariable("fournisseurId") Long id){
         List<CommandeFournisseurResponseDTO> commandes = commandeFournisseurService.getCommandesBySupplierId(id);
         return ResponseEntity.ok(commandes);
     }
 
     @PutMapping("/{commandeId}/reception")
+    @RequirePermission("COMMANDE_RECEIVE")
     public ResponseEntity<CommandeFournisseurResponseDTO> receiveCommande(@PathVariable("commandeId") Long id){
         CommandeFournisseurResponseDTO commande = commandeFournisseurService.receiveCommande(id);
         return ResponseEntity.ok(commande);
     }
 
     @PutMapping("/{commandeId}/valider")
+    @RequirePermission("COMMANDE_VALIDATE")
     public ResponseEntity<CommandeFournisseurResponseDTO> validerCommande(@PathVariable("commandeId") Long id){
         CommandeFournisseurResponseDTO commande = commandeFournisseurService.validerCommande(id);
         return ResponseEntity.ok(commande);

@@ -68,13 +68,3 @@ L'utilisateur Amine a le rôle MAGASINIER. Par défaut, selon la matrice des per
 - Docker Build & Push
 - Configurer les Secrets GitHub
 
-## Récapitulatif
-
-- Objectif
-- Utilisateurs et Rôles
-- Gestion dynamique des permissions
-- Principe de fonctionnement
-- Exemple concret
-- Test unitaire
-- Dockerization de l’application
-- CI avec GITHUB ACTIONS (1 workflow)  

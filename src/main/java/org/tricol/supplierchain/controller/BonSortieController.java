@@ -9,6 +9,7 @@ import org.tricol.supplierchain.dto.request.BonSortieRequestDTO;
 import org.tricol.supplierchain.dto.request.BonSortieUpdateDTO;
 import org.tricol.supplierchain.dto.response.BonSortieResponseDTO;
 import org.tricol.supplierchain.enums.Atelier;
+import org.tricol.supplierchain.security.RequirePermission;
 import org.tricol.supplierchain.service.inter.BonSortieService;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public class BonSortieController {
     private final BonSortieService bonSortieService;
 
     @PostMapping()
+    @RequirePermission("BON_SORTIE_CREATE")
     public ResponseEntity<BonSortieResponseDTO> createBonSortie(@RequestBody @Valid BonSortieRequestDTO bonSortieRequestDTO) {
 
         BonSortieResponseDTO responseDTO = bonSortieService.createBonSortie(bonSortieRequestDTO);
@@ -30,30 +32,35 @@ public class BonSortieController {
 
 
     @GetMapping()
+    @RequirePermission("BON_SORTIE_READ")
     public ResponseEntity<List<BonSortieResponseDTO>> getBonSorties() {
         List<BonSortieResponseDTO> bonSorties = bonSortieService.getBonSorties();
         return ResponseEntity.ok(bonSorties);
     }
 
     @GetMapping("/{id}")
+    @RequirePermission("BON_SORTIE_READ")
     public ResponseEntity<BonSortieResponseDTO> getBonSortieById(@PathVariable Long id) {
         BonSortieResponseDTO bonSortie = bonSortieService.getBonSortieById(id);
         return ResponseEntity.ok(bonSortie);
     }
 
     @DeleteMapping("/{id}")
+    @RequirePermission("BON_SORTIE_CANCEL")
     public ResponseEntity<String> deleteBonSortie(@PathVariable Long id) {
         bonSortieService.deleteBonSortie(id);
         return ResponseEntity.ok("Bon de sortie avec id " +id +" est supprimé" );
     }
 
     @GetMapping("/atelier/{atelier}")
+    @RequirePermission("BON_SORTIE_READ")
     public ResponseEntity<List<BonSortieResponseDTO>> getBonSortiesByAtelier(@PathVariable Atelier atelier) {
         List<BonSortieResponseDTO> bonSorties = bonSortieService.getBonSortiesByAtelier(atelier);
         return ResponseEntity.ok(bonSorties);
     }
 
     @PutMapping("/{id}")
+    @RequirePermission("BON_SORTIE_CREATE")
     public ResponseEntity<BonSortieResponseDTO> updateBonSortie(@PathVariable Long id, @Valid @RequestBody BonSortieUpdateDTO bonSortieUpdateDTO) {
         BonSortieResponseDTO updatedBonSortie = bonSortieService.updateBonSortie(id, bonSortieUpdateDTO);
         return ResponseEntity.ok(updatedBonSortie);
@@ -61,12 +68,14 @@ public class BonSortieController {
 
 
     @PutMapping("/annulation/{id}")
+    @RequirePermission("BON_SORTIE_CANCEL")
     public ResponseEntity<String> annulationBonSortie(@PathVariable Long id) {
         bonSortieService.annulationBonSortie(id);
         return ResponseEntity.ok("Bon de sortie avec id " +id +" est annulé" );
     }
 
     @PutMapping("/validation/{id}")
+    @RequirePermission("BON_SORTIE_VALIDATE")
     public ResponseEntity<BonSortieResponseDTO> validationBonSortie(@PathVariable Long id) {
             BonSortieResponseDTO validatedBonSortie = bonSortieService.validationBonSortie(id);
             return ResponseEntity.ok(validatedBonSortie);
