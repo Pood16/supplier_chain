@@ -13,10 +13,12 @@ import org.tricol.supplierchain.dto.request.RegisterRequest;
 import org.tricol.supplierchain.dto.response.LoginResponse;
 import org.tricol.supplierchain.dto.response.RegisterResponse;
 import org.tricol.supplierchain.entity.RefreshToken;
+import org.tricol.supplierchain.entity.Role;
 import org.tricol.supplierchain.entity.UserApp;
 import org.tricol.supplierchain.exception.BusinessException;
 import org.tricol.supplierchain.exception.DuplicateResourceException;
 import org.tricol.supplierchain.mapper.UserMapper;
+import org.tricol.supplierchain.repository.RoleRepository;
 import org.tricol.supplierchain.repository.UserRepository;
 import org.tricol.supplierchain.security.CustomUserDetailsService;
 import org.tricol.supplierchain.security.JwtService;
@@ -34,6 +36,7 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final CustomUserDetailsService userDetailsService;
     private final UserMapper userMapper;
+    private final RoleRepository roleRepository;
 
     @Override
     @Transactional
@@ -45,12 +48,16 @@ public class AuthServiceImpl implements AuthService {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new DuplicateResourceException("Email already exists: " + request.getEmail());
         }
+        Role role = null;
+        if (userRepository.count() == 0){
+            role = roleRepository.findByName("ADMIN").orElse(null);
+        }
 
         UserApp user = UserApp.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(null)
+                .role(role)
                 .enabled(true)
                 .build();
 
