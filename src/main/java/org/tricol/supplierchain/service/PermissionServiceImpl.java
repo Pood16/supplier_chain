@@ -32,7 +32,8 @@ public class PermissionServiceImpl implements PermissionService {
             List<RolePermission> rolePermissions = rolePermissionRepository
                     .findByRoleWithPermissions(user.getRole());
             
-            permissions = rolePermissions.stream()
+            permissions = rolePermissions
+                    .stream()
                     .map(rp -> rp.getPermission().getName())
                     .collect(Collectors.toSet());
         }
@@ -44,10 +45,8 @@ public class PermissionServiceImpl implements PermissionService {
 
         for (UserPermission up : userPermissions) {
             if (up.getGranted()) {
-
                 permissions.add(up.getPermission().getName());
             } else {
-
                 permissions.remove(up.getPermission().getName());
             }
         }
