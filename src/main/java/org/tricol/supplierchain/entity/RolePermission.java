@@ -1,12 +1,11 @@
 package org.tricol.supplierchain.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.*;  
 import lombok.*;
-import org.tricol.supplierchain.enums.RoleApp;
 
 @Entity
 @Table(name = "role_permissions", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"role", "permission_id"})
+        @UniqueConstraint(columnNames = {"role_id", "permission_id"})
 })
 @Getter
 @Setter
@@ -19,9 +18,9 @@ public class RolePermission {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 50)
-    private RoleApp role;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "permission_id", nullable = false)

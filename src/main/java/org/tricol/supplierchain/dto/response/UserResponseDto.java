@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.tricol.supplierchain.enums.RoleApp;
 
 @Data
 @Builder
@@ -15,5 +14,5 @@ public class UserResponseDto {
     private Long id;
     private String username;
     private String email;
-    private RoleApp role;
+    private String roleName;
 }

@@ -52,7 +52,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toSet());
         if (user.getRole() != null) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole()));
         }
         return authorities;
     }

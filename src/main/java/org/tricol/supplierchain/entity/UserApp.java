@@ -2,7 +2,6 @@ package org.tricol.supplierchain.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.tricol.supplierchain.enums.RoleApp;
 
 import java.time.LocalDateTime;
 
@@ -28,9 +27,9 @@ public class UserApp {
     @Column(nullable = false)
     private String password;
 
-    @Enumerated(EnumType.STRING)
-    @Column(length = 50)
-    private RoleApp role;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id")
+    private Role role;
 
     @Column(nullable = false)
     @Builder.Default
