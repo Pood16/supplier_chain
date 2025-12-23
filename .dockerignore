@@ -8,3 +8,4 @@ target/
 mvnw
 mvnw.cmd
 *.iml
+docs/
