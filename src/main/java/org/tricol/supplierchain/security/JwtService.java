@@ -47,6 +47,7 @@ public class JwtService {
             UserDetails userDetails,
             long expiration
     ) {
+
         return Jwts
                 .builder()
                 .claims(extraClaims)
