@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.tricol.supplierchain.entity.UserApp;
 import org.tricol.supplierchain.exception.InsufficientPermissionsException;
 import org.tricol.supplierchain.repository.UserRepository;
+import org.tricol.supplierchain.service.CurrentUserService;
 import org.tricol.supplierchain.service.inter.PermissionService;
 
 import java.lang.reflect.Method;
@@ -22,7 +23,7 @@ import java.lang.reflect.Method;
 public class PermissionAspect {
 
     private final PermissionService permissionService;
-    private final UserRepository userRepository;
+    private final CurrentUserService currentUserService;
 
     @Around("@annotation(org.tricol.supplierchain.security.RequirePermission)")
     public Object checkPermission(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -37,10 +38,10 @@ public class PermissionAspect {
             throw new AccessDeniedException("User is not authenticated");
         }
 
-        String username = authentication.getName();
-        UserApp user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new AccessDeniedException("User not found"));
-
+        UserApp user = currentUserService.getCurrentUser();
+        if (user == null) {
+            throw new AccessDeniedException("User not found");
+        }
 
         if (!permissionService.hasPermission(user, requiredPermission)) {
             throw new InsufficientPermissionsException("Access denied: missing required permissions");

@@ -15,6 +15,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.tricol.supplierchain.entity.UserApp;
 import org.tricol.supplierchain.repository.UserRepository;
+import org.tricol.supplierchain.service.CurrentUserService;
 import org.tricol.supplierchain.service.inter.AuditService;
 
 import java.lang.reflect.Method;
@@ -28,7 +29,7 @@ import java.util.Map;
 public class AuditAspect {
 
     private final AuditService auditService;
-    private final UserRepository userRepository;
+    private final CurrentUserService currentUserService;
     private final ObjectMapper objectMapper;
 
     @Around("@annotation(org.tricol.supplierchain.security.RequirePermission)")
@@ -45,8 +46,9 @@ public class AuditAspect {
 
         if (authentication != null && authentication.isAuthenticated()) {
             try {
-                UserApp user = userRepository.findByUsername(username).orElse(null);
+                UserApp user = currentUserService.getCurrentUser();
                 userId = user != null ? user.getId() : null;
+                username = user != null ? user.getUsername() : username;
             } catch (Exception e) {
                 log.warn("Failed to retrieve user ID for audit: {}", e.getMessage());
             }

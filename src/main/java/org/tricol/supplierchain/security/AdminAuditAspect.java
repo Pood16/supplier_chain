@@ -12,6 +12,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.tricol.supplierchain.entity.UserApp;
 import org.tricol.supplierchain.repository.UserRepository;
+import org.tricol.supplierchain.service.CurrentUserService;
 import org.tricol.supplierchain.service.inter.AuditService;
 
 @Aspect
@@ -21,7 +22,7 @@ import org.tricol.supplierchain.service.inter.AuditService;
 public class AdminAuditAspect {
 
     private final AuditService auditService;
-    private final UserRepository userRepository;
+    private final CurrentUserService currentUserService;
 
     @AfterReturning(
             pointcut = "execution(* org.tricol.supplierchain.service.UserAdminServiceImpl.assignRole(..))",
@@ -29,8 +30,7 @@ public class AdminAuditAspect {
     )
     public void auditRoleAssignment(JoinPoint joinPoint, UserApp result) {
         try {
-            String adminUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-            UserApp admin = userRepository.findByUsername(adminUsername).orElse(null);
+            UserApp admin = currentUserService.getCurrentUser();
             String ipAddress = getClientIpAddress();
 
             Object[] args = joinPoint.getArgs();
@@ -38,7 +38,7 @@ public class AdminAuditAspect {
 
             auditService.logAudit(
                     admin != null ? admin.getId() : null,
-                    adminUsername,
+                    admin != null ? admin.getUsername() : "unknown",
                     "ASSIGN_ROLE",
                     "USER_MANAGEMENT",
                     String.format("Assigned role '%s' to user ID: %d", result.getRole(), targetUserId),
@@ -54,8 +54,7 @@ public class AdminAuditAspect {
     )
     public void auditPermissionModification(JoinPoint joinPoint) {
         try {
-            String adminUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-            UserApp admin = userRepository.findByUsername(adminUsername).orElse(null);
+            UserApp admin = currentUserService.getCurrentUser();
             String ipAddress = getClientIpAddress();
 
             Object[] args = joinPoint.getArgs();
@@ -63,7 +62,7 @@ public class AdminAuditAspect {
 
             auditService.logAudit(
                     admin != null ? admin.getId() : null,
-                    adminUsername,
+                    admin != null ? admin.getUsername() : "unknown",
                     "MODIFY_PERMISSION",
                     "USER_MANAGEMENT",
                     String.format("Modified permission for user ID: %d", targetUserId),

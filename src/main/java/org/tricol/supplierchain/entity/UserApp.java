@@ -24,7 +24,10 @@ public class UserApp {
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
-    @Column(nullable = false)
+    @Column(unique = true, length = 255)
+    private String keycloakUserId;
+
+    @Column(nullable = true)
     private String password;
 
     @ManyToOne(fetch = FetchType.EAGER)

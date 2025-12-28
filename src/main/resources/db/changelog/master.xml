@@ -12,6 +12,7 @@
     <include file="db/changelog/changes/005-create-security-tables.sql"/>
     <include file="db/changelog/changes/006-create-refresh-tokens.sql"/>
     <include file="db/changelog/changes/007-create-audit-logs.sql"/>
+    <include file="db/changelog/changes/008-add-keycloak-user-id.sql"/>
     <include file="/db/changelog/changes/101-data-initializer.sql"/>
     <include file="/db/changelog/changes/102-insert-security-data.sql"/>
 
