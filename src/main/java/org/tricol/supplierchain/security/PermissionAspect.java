@@ -11,6 +11,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.tricol.supplierchain.entity.UserApp;
 import org.tricol.supplierchain.exception.InsufficientPermissionsException;
+import org.tricol.supplierchain.exception.ResourceNotFoundException;
+import org.tricol.supplierchain.exception.UnAuthorizedException;
 import org.tricol.supplierchain.repository.UserRepository;
 import org.tricol.supplierchain.service.inter.PermissionService;
 
@@ -34,12 +36,12 @@ public class PermissionAspect {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
-            throw new AccessDeniedException("User is not authenticated");
+            throw new UnAuthorizedException();
         }
 
         String username = authentication.getName();
         UserApp user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new AccessDeniedException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
 
         if (!permissionService.hasPermission(user, requiredPermission)) {

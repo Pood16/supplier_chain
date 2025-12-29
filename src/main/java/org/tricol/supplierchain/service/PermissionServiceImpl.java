@@ -44,7 +44,7 @@ public class PermissionServiceImpl implements PermissionService {
 
 
         for (UserPermission up : userPermissions) {
-            if (up.getGranted()) {
+            if (Boolean.TRUE.equals(up.getGranted())) {
                 permissions.add(up.getPermission().getName());
             } else {
                 permissions.remove(up.getPermission().getName());

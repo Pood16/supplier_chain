@@ -18,9 +18,7 @@ public class GlobalHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<HashMap<String, String>> handleValidationErrors(MethodArgumentNotValidException ex) {
         HashMap<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach((error) -> {
-            errors.put(error.getField(), error.getDefaultMessage());
-        });
+        ex.getBindingResult().getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
 
@@ -50,6 +48,13 @@ public class GlobalHandler {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<HashMap<String, String>> handleBadCredentials(BadCredentialsException ex) {
+        HashMap<String, String> errors = new HashMap<>();
+        errors.put("error", ex.getMessage());
+        errors.put("status", "401");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errors);
+    }
+    @ExceptionHandler(UnAuthorizedException.class)
+    public ResponseEntity<HashMap<String, String>> handleAuthentication(UnAuthorizedException ex) {
         HashMap<String, String> errors = new HashMap<>();
         errors.put("error", ex.getMessage());
         errors.put("status", "401");

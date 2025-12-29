@@ -30,8 +30,8 @@ public class CustomUserDetailsService implements UserDetailsService {
         UserApp user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        if (!user.getEnabled()) {
-            throw new UsernameNotFoundException("User Account is disabled: ");
+        if (Boolean.FALSE.equals(user.getEnabled())) {
+            throw new UsernameNotFoundException("User Account is disabled");
         }
 
         return User
@@ -48,7 +48,8 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private Collection<? extends GrantedAuthority> getAuthorities(UserApp user) {
         Set<String> permissions = permissionService.getUserPermissions(user);
-        Set<GrantedAuthority> authorities = permissions.stream()
+        Set<GrantedAuthority> authorities = permissions
+                .stream()
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toSet());
         if (user.getRole() != null) {
