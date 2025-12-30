@@ -17,6 +17,7 @@ import org.tricol.supplierchain.entity.Role;
 import org.tricol.supplierchain.entity.UserApp;
 import org.tricol.supplierchain.exception.BusinessException;
 import org.tricol.supplierchain.exception.DuplicateResourceException;
+import org.tricol.supplierchain.exception.InsufficientPermissionsException;
 import org.tricol.supplierchain.mapper.UserMapper;
 import org.tricol.supplierchain.repository.RoleRepository;
 import org.tricol.supplierchain.repository.UserRepository;
@@ -89,7 +90,7 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new BusinessException("User not found"));
 
         if (user.getRole() == null) {
-            throw new BusinessException("User has no role assigned. Please contact administrator.");
+            throw new InsufficientPermissionsException("User has no role assigned. Please contact administrator.");
         }
 
         String accessToken = jwtService.generateAccessToken(userDetails);

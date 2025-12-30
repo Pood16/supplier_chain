@@ -5,7 +5,6 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -29,20 +28,20 @@ public class PermissionAspect {
     @Around("@annotation(org.tricol.supplierchain.security.RequirePermission)")
     public Object checkPermission(ProceedingJoinPoint joinPoint) throws Throwable {
 
-        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-        Method method = signature.getMethod();
-        RequirePermission requirePermission = method.getAnnotation(RequirePermission.class);
-        String requiredPermission = requirePermission.value();
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new UnAuthorizedException();
         }
 
-        String username = authentication.getName();
-        UserApp user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        Method method = signature.getMethod();
+        RequirePermission requirePermission = method.getAnnotation(RequirePermission.class);
+        String requiredPermission = requirePermission.value();
 
+
+        String username = authentication.getName();
+        UserApp user = userRepository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (!permissionService.hasPermission(user, requiredPermission)) {
             throw new InsufficientPermissionsException("Access denied: missing required permissions");
