@@ -15,7 +15,6 @@ import org.tricol.supplierchain.dto.response.UserResponseDto;
 import org.tricol.supplierchain.dto.response.UserWithPermissionsResponseDto;
 import org.tricol.supplierchain.service.inter.UserAdminService;
 
-import java.util.List;
 import java.util.Set;
 
 @RestController

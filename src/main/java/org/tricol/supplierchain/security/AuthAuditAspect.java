@@ -35,7 +35,7 @@ public class AuthAuditAspect {
             Object[] args = joinPoint.getArgs();
             if (args.length > 0 && args[0] instanceof LoginRequest) {
                 LoginRequest loginRequest = (LoginRequest) args[0];
-                String ipAddress = getClientIpAddress();
+
 
                 UserApp user = userRepository.findByUsername(loginRequest.getUsername()).orElse(null);
 
@@ -44,8 +44,7 @@ public class AuthAuditAspect {
                         loginRequest.getUsername(),
                         "LOGIN",
                         "AUTH",
-                        "User logged in successfully",
-                        ipAddress
+                        "User logged in successfully"
                 );
             }
         } catch (Exception e) {
@@ -62,15 +61,14 @@ public class AuthAuditAspect {
             Object[] args = joinPoint.getArgs();
             if (args.length > 0 && args[0] instanceof LoginRequest) {
                 LoginRequest loginRequest = (LoginRequest) args[0];
-                String ipAddress = getClientIpAddress();
+
 
                 auditService.logAudit(
                         null,
                         loginRequest.getUsername(),
                         "LOGIN_FAILED",
                         "AUTH",
-                        "Failed login attempt: " + error.getMessage(),
-                        ipAddress
+                        "Failed login attempt: " + error.getMessage()
                 );
             }
         } catch (Exception e) {
@@ -85,7 +83,7 @@ public class AuthAuditAspect {
     public void auditRegistration(JoinPoint joinPoint, RegisterResponse result) {
         try {
             Object[] args = joinPoint.getArgs();
-            String ipAddress = getClientIpAddress();
+
             
             String username = "unknown";
             Long userId = null;
@@ -106,8 +104,7 @@ public class AuthAuditAspect {
                     username,
                     "REGISTER",
                     "AUTH",
-                    "New user registered",
-                    ipAddress
+                    "New user registered"
             );
         } catch (Exception e) {
             log.error("Failed to audit registration: {}", e.getMessage());
@@ -122,39 +119,15 @@ public class AuthAuditAspect {
     )
     public void auditTokenRefresh(JoinPoint joinPoint, LoginResponse result) {
         try {
-            String ipAddress = getClientIpAddress();
-
             auditService.logAudit(
                     null,
                     "token-refresh",
                     "TOKEN_REFRESH",
                     "AUTH",
-                    "Access token refreshed",
-                    ipAddress
+                    "Access token refreshed"
             );
         } catch (Exception e) {
             log.error("Failed to audit token refresh: {}", e.getMessage());
-        }
-    }
-    private String getClientIpAddress() {
-        try {
-            ServletRequestAttributes attributes = 
-                    (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
-            HttpServletRequest request = attributes.getRequest();
-
-            String xForwardedFor = request.getHeader("X-Forwarded-For");
-            if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-                return xForwardedFor.split(",")[0].trim();
-            }
-
-            String xRealIp = request.getHeader("X-Real-IP");
-            if (xRealIp != null && !xRealIp.isEmpty()) {
-                return xRealIp;
-            }
-
-            return request.getRemoteAddr();
-        } catch (Exception e) {
-            return "unknown";
         }
     }
 }

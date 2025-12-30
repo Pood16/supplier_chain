@@ -31,7 +31,6 @@ public class AdminAuditAspect {
         try {
             String adminUsername = SecurityContextHolder.getContext().getAuthentication().getName();
             UserApp admin = userRepository.findByUsername(adminUsername).orElse(null);
-            String ipAddress = getClientIpAddress();
 
             Object[] args = joinPoint.getArgs();
             Long targetUserId = (Long) args[0];
@@ -41,8 +40,7 @@ public class AdminAuditAspect {
                     adminUsername,
                     "ASSIGN_ROLE",
                     "USER_MANAGEMENT",
-                    String.format("Assigned role '%s' to user ID: %d", result.getRole(), targetUserId),
-                    ipAddress
+                    String.format("Assigned role '%s' to user ID: %d", result.getRole(), targetUserId)
             );
         } catch (Exception e) {
             log.error("Failed to audit role assignment: {}", e.getMessage());
@@ -56,7 +54,6 @@ public class AdminAuditAspect {
         try {
             String adminUsername = SecurityContextHolder.getContext().getAuthentication().getName();
             UserApp admin = userRepository.findByUsername(adminUsername).orElse(null);
-            String ipAddress = getClientIpAddress();
 
             Object[] args = joinPoint.getArgs();
             Long targetUserId = (Long) args[0];
@@ -66,33 +63,10 @@ public class AdminAuditAspect {
                     adminUsername,
                     "MODIFY_PERMISSION",
                     "USER_MANAGEMENT",
-                    String.format("Modified permission for user ID: %d", targetUserId),
-                    ipAddress
+                    String.format("Modified permission for user ID: %d", targetUserId)
             );
         } catch (Exception e) {
             log.error("Failed to audit permission modification: {}", e.getMessage());
-        }
-    }
-
-    private String getClientIpAddress() {
-        try {
-            ServletRequestAttributes attributes = 
-                    (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
-            HttpServletRequest request = attributes.getRequest();
-
-            String xForwardedFor = request.getHeader("X-Forwarded-For");
-            if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-                return xForwardedFor.split(",")[0].trim();
-            }
-
-            String xRealIp = request.getHeader("X-Real-IP");
-            if (xRealIp != null && !xRealIp.isEmpty()) {
-                return xRealIp;
-            }
-
-            return request.getRemoteAddr();
-        } catch (Exception e) {
-            return "unknown";
         }
     }
 }

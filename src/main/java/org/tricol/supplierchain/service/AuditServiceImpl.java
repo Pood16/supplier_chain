@@ -26,7 +26,7 @@ public class AuditServiceImpl implements AuditService {
     @Override
     @Async
     @Transactional
-    public void logAudit(Long userId, String username, String action, String resource, String details, String ipAddress) {
+    public void logAudit(Long userId, String username, String action, String resource, String details) {
         try {
             AuditLog auditLog = AuditLog
                     .builder()
@@ -35,7 +35,6 @@ public class AuditServiceImpl implements AuditService {
                     .action(action)
                     .resource(resource)
                     .details(details)
-                    .ipAddress(ipAddress)
                     .actionTimestamp(LocalDateTime.now())
                     .build();
             auditLogRepository.save(auditLog);

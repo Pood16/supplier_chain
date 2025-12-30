@@ -10,5 +10,5 @@ import java.util.List;
 
 @Repository
 public interface AuditLogRepository extends JpaRepository<AuditLog, Long>, JpaSpecificationExecutor<AuditLog> {
-    List<AuditLog> findByCreatedAtBefore(LocalDateTime date);
+    List<AuditLog> findByActionTimestampBefore(LocalDateTime date);
 }

@@ -8,6 +8,6 @@ import org.tricol.supplierchain.entity.AuditLog;
 
 
 public interface AuditService {
-    void logAudit(Long userId, String username, String action, String resource, String details, String ipAddress);
+    void logAudit(Long userId, String username, String action, String resource, String details);
     Page<AuditLog> searchAuditLogs(AuditLogSearchCriteria criteria, Pageable pageable);
 }

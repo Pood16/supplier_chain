@@ -2,6 +2,7 @@ package org.tricol.supplierchain.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -38,20 +39,16 @@ public class AuditLog {
     @Column(columnDefinition = "TEXT")
     private String details;
 
-    @Column(name = "ip_address", length = 45)
-    private String ipAddress;
-
     @Column(name = "action_timestamp", nullable = false)
+    @CreationTimestamp
     private LocalDateTime actionTimestamp;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        if (actionTimestamp == null) {
-            actionTimestamp = LocalDateTime.now();
-        }
-    }
+//    @PrePersist
+//    protected void onCreate() {
+//        createdAt = LocalDateTime.now();
+//        if (actionTimestamp == null) {
+//            actionTimestamp = LocalDateTime.now();
+//        }
+//    }
 }
