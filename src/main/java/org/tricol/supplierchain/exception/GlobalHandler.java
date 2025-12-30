@@ -4,6 +4,7 @@ package org.tricol.supplierchain.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -63,6 +64,14 @@ public class GlobalHandler {
 
     @ExceptionHandler(InsufficientPermissionsException.class)
     public ResponseEntity<HashMap<String, String>> handleCustomAccessDeniedException(InsufficientPermissionsException ex) {
+        HashMap<String, String> errors = new HashMap<>();
+        errors.put("error", ex.getMessage());
+        errors.put("status", "403");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errors);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<HashMap<String, String>> handleAccessDeniedException(AccessDeniedException ex) {
         HashMap<String, String> errors = new HashMap<>();
         errors.put("error", ex.getMessage());
         errors.put("status", "403");

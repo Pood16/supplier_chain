@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.tricol.supplierchain.dto.request.MouvementStockSearchCriteria;
 import org.tricol.supplierchain.dto.response.AlerteStockResponseDTO;
@@ -16,7 +17,6 @@ import org.tricol.supplierchain.dto.response.MouvementStockResponseDTO;
 import org.tricol.supplierchain.dto.response.StockGlobalResponseDTO;
 import org.tricol.supplierchain.dto.response.StockProduitResponseDTO;
 import org.tricol.supplierchain.enums.TypeMouvement;
-import org.tricol.supplierchain.security.RequirePermission;
 import org.tricol.supplierchain.service.MouvementStockSearchService;
 import org.tricol.supplierchain.service.inter.GestionStockService;
 
@@ -34,13 +34,13 @@ public class StockController {
 
 
     @GetMapping
-    @RequirePermission("STOCK_READ")
+    @PreAuthorize("hasAuthority('STOCK_READ')")
     public ResponseEntity<StockGlobalResponseDTO> getStockGlobal() {
         return ResponseEntity.ok(stockService.getStockGlobal());
     }
 
     @GetMapping("/produit/{id}")
-    @RequirePermission("STOCK_READ")
+    @PreAuthorize("hasAuthority('STOCK_READ')")
     public ResponseEntity<StockProduitResponseDTO> getStockByProduit(
             @PathVariable Long id
     ){
@@ -48,25 +48,25 @@ public class StockController {
     }
 
     @GetMapping("/mouvements")
-    @RequirePermission("STOCK_HISTORY_READ")
+    @PreAuthorize("hasAuthority('STOCK_HISTORY_READ')")
     public ResponseEntity<List<MouvementStockResponseDTO>> getMouvementsHistorique(){
         return ResponseEntity.ok(stockService.getHistoriqueMouvements());
     }
 
     @GetMapping("/mouvements/produit/{id}")
-    @RequirePermission("STOCK_HISTORY_READ")
+    @PreAuthorize("hasAuthority('STOCK_HISTORY_READ')")
     public ResponseEntity<List<MouvementStockResponseDTO>> getMouvementsByProduit(@PathVariable Long id){
         return ResponseEntity.ok(stockService.getMouvementsByProduit(id));
     }
 
     @GetMapping("/valorisation")
-    @RequirePermission("STOCK_VALUATION_READ")
+    @PreAuthorize("hasAuthority('STOCK_VALUATION_READ')")
     public ResponseEntity<BigDecimal> getValorisationTotale(){
         return ResponseEntity.ok(stockService.getValorisationTotale());
     }
 
     @GetMapping("/mouvements/search")
-    @RequirePermission("STOCK_HISTORY_READ")
+    @PreAuthorize("hasAuthority('STOCK_HISTORY_READ')")
     public ResponseEntity<Page<MouvementStockResponseDTO>> searchMouvements(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateDebut,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFin,

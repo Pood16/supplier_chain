@@ -7,12 +7,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.tricol.supplierchain.dto.request.AssignRoleRequest;
 import org.tricol.supplierchain.dto.request.ModifyPermissionRequest;
 import org.tricol.supplierchain.dto.response.UserResponseDto;
 import org.tricol.supplierchain.dto.response.UserWithPermissionsResponseDto;
-import org.tricol.supplierchain.security.RequirePermission;
 import org.tricol.supplierchain.service.inter.UserAdminService;
 
 import java.util.List;
@@ -26,7 +26,7 @@ public class UserAdminController {
     private final UserAdminService userAdminService;
 
     @GetMapping
-    @RequirePermission("USER_MANAGE")
+    @PreAuthorize("hasAuthority('USER_MANAGE')")
     public ResponseEntity<Page<UserResponseDto>> getUsers(
            @PageableDefault(size = 10, page = 0, sort = "username", direction = Sort.Direction.DESC) Pageable pageable
     ){
@@ -34,7 +34,7 @@ public class UserAdminController {
     }
 
     @PutMapping("/{id}/role")
-    @RequirePermission("USER_MANAGE")
+    @PreAuthorize("hasAuthority('USER_MANAGE')")
     public ResponseEntity<UserWithPermissionsResponseDto> assignRole(
             @PathVariable Long id,
             @Valid @RequestBody AssignRoleRequest request
@@ -44,7 +44,7 @@ public class UserAdminController {
     }
 
     @PutMapping("/{id}/permissions")
-    @RequirePermission("USER_MANAGE")
+    @PreAuthorize("hasAuthority('USER_MANAGE')")
     public ResponseEntity<UserWithPermissionsResponseDto> modifyPermission(
             @PathVariable Long id,
             @Valid @RequestBody ModifyPermissionRequest request
@@ -54,7 +54,7 @@ public class UserAdminController {
     }
 
     @GetMapping("/{id}/permissions")
-    @RequirePermission("USER_MANAGE")
+    @PreAuthorize("hasAuthority('USER_MANAGE')")
     public ResponseEntity<Set<String>> getUserPermissions(@PathVariable Long id) {
         Set<String> permissions = userAdminService.getUserEffectivePermissions(id);
         return ResponseEntity.ok(permissions);
