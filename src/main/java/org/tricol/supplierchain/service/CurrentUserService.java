@@ -7,8 +7,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.tricol.supplierchain.entity.Role;
 import org.tricol.supplierchain.entity.UserApp;
+import org.tricol.supplierchain.repository.RoleRepository;
 import org.tricol.supplierchain.repository.UserRepository;
+
+import java.util.Collection;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -16,6 +21,7 @@ import org.tricol.supplierchain.repository.UserRepository;
 public class CurrentUserService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
 
     @Transactional
     public UserApp getCurrentUser() {
@@ -42,6 +48,8 @@ public class CurrentUserService {
         String keycloakUserId = jwt.getSubject();
         String username = jwt.getClaimAsString("preferred_username");
         String email = jwt.getClaimAsString("email");
+        
+        Role role = extractRoleFromJwt(jwt);
 
         UserApp user = UserApp.builder()
                 .keycloakUserId(keycloakUserId)
@@ -49,12 +57,33 @@ public class CurrentUserService {
                 .email(email != null ? email : keycloakUserId + "@keycloak.local")
                 .password(null)
                 .enabled(true)
-                .role(null)
+                .role(role)
                 .build();
 
         UserApp savedUser = userRepository.save(user);
-        log.info("Auto-created Keycloak user: {} (ID: {})", username, keycloakUserId);
+        log.info("Auto-created Keycloak user: {} (ID: {}) with role: {}", 
+                username, keycloakUserId, role != null ? role.getName() : "none");
         
         return savedUser;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Role extractRoleFromJwt(Jwt jwt) {
+        try {
+            Map<String, Object> resourceAccess = jwt.getClaim("resource_access");
+            if (resourceAccess != null) {
+                Map<String, Object> resource = (Map<String, Object>) resourceAccess.get("supplier-chain-api");
+                if (resource != null) {
+                    Collection<String> roles = (Collection<String>) resource.get("roles");
+                    if (roles != null && !roles.isEmpty()) {
+                        String roleName = roles.iterator().next();
+                        return roleRepository.findByName(roleName).orElse(null);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to extract role from JWT: {}", e.getMessage());
+        }
+        return null;
     }
 }

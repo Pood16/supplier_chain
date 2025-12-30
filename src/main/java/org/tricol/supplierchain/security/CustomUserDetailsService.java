@@ -30,7 +30,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         UserApp user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        if (!user.getEnabled()) {
+        if (Boolean.FALSE.equals(user.getEnabled())) {
             throw new UsernameNotFoundException("User Account is disabled: ");
         }
 

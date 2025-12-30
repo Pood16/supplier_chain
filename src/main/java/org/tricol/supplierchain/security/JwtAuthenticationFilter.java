@@ -38,8 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         final String jwt = authHeader.substring(7);
-        
-        // Only process if it's a local JWT token and not already authenticated
+
         if (SecurityContextHolder.getContext().getAuthentication() == null && isLocalToken(jwt)) {
             try {
                 String username = jwtService.extractUsername(jwt);
@@ -66,11 +65,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private boolean isLocalToken(String token) {
         try {
-            // Local tokens are signed with our secret key
             jwtService.extractUsername(token);
             return true;
         } catch (Exception e) {
-            // If parsing fails, it's likely a Keycloak token
             return false;
         }
     }
