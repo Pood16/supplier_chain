@@ -99,7 +99,7 @@ public class AuthServiceImpl implements AuthService {
         return LoginResponse
                 .builder()
                 .accessToken(accessToken)
-                .refreshToken(refreshToken.getToken())
+                .refreshToken(accessToken)
                 .build();
     }
 
